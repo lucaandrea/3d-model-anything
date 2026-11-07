@@ -1,0 +1,4 @@
+node_modules/
+teardown-out/
+catalog-assets/models/
+private/

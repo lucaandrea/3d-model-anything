@@ -103,11 +103,14 @@ struct HouseScreen: View {
   // MARK: sections
 
   private func list(_ house: HouseProject) -> some View {
-    ScrollView {
+    let floors = FloorScanLibrary.groups(in: house)
+    let checkpointRooms = floors.reduce(into: Set<String>()) { $0.formUnion($1.roomIDs) }
+    let detailRooms = house.rooms.filter { !checkpointRooms.contains($0.id) }
+    return ScrollView {
       LazyVStack(alignment: .leading, spacing: 0) {
         VStack(alignment: .leading, spacing: 8) {
           Text(house.name).font(.largeTitle.weight(.bold)).tracking(-1)
-          Text("\(house.rooms.count) room\(house.rooms.count == 1 ? "" : "s")")
+          Text(FloorScanLibrary.summary(house: house, groups: floors))
             .font(.title3).foregroundStyle(Fieldwork.secondary)
         }.padding(.top, 12).padding(.bottom, 28)
         FieldworkRule()
@@ -119,7 +122,19 @@ struct HouseScreen: View {
               .foregroundStyle(Fieldwork.secondary)
           }.padding(.vertical, 40)
         }
-        ForEach(Array(house.rooms.enumerated()), id: \.element.id) { number, room in
+        ForEach(floors) { floor in
+          VStack(alignment: .leading, spacing: 12) {
+            Label(floor.context.step.title, systemImage: "square.3.layers.3d").font(.title2.bold())
+            Text("\(floor.checkpointCount) saved checkpoints · one floor capture").font(.subheadline)
+            Text("Checkpoints save your progress as you walk. Continue in the same floor workflow; review the whole floor when finished.")
+              .font(.footnote).foregroundStyle(Fieldwork.secondary)
+            Button("Open floor scan", systemImage: "viewfinder") {
+              onCapture(house.id, floor.context.zoneID, nil, nil)
+            }.buttonStyle(.borderedProminent)
+          }.padding(.vertical, 24)
+          FieldworkRule()
+        }
+        ForEach(Array(detailRooms.enumerated()), id: \.element.id) { number, room in
           NavigationLink {
             FieldworkRoomScreen(houseID: house.id, roomID: room.id, generation: generation, onCapture: onCapture)
           } label: {
@@ -164,7 +179,7 @@ struct HouseScreen: View {
     }
     .safeAreaInset(edge: .bottom) {
       Button { onCapture(house.id, nil, nil, nil) } label: {
-        Label("Scan a room", systemImage: "viewfinder")
+        Label(floors.isEmpty ? "Scan a room" : "Continue floor scan", systemImage: "viewfinder")
       }.buttonStyle(FieldworkButtonStyle()).disabled(!CaptureController.isSupported)
         .padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 10).background(Fieldwork.paper)
     }
@@ -215,7 +230,8 @@ struct HouseScreen: View {
         AlignmentBadge(alignment: s.alignment)
       }
       let names = s.rooms.compactMap { i in manifests[s.id]?.rooms.first { $0.index == i }?.name ?? "Room \(i + 1)" }
-      Text("\(names.isEmpty ? "no rooms" : names.joined(separator: ", "))\(s.endedAt == nil ? " · incomplete" : "")")
+      let floorContext = FloorScanLibrary.context(house: house, session: s)
+      Text((floorContext.map { "\($0.step.title) · \(s.rooms.count) checkpoints" } ?? (names.isEmpty ? "no rooms" : names.joined(separator: ", "))) + (s.endedAt == nil ? " · incomplete" : ""))
         .font(.footnote)
         .foregroundStyle(s.endedAt == nil ? .orange : .secondary)
       HStack {

@@ -129,6 +129,7 @@ struct DiagnosticsView: View {
 /// relocalizes against the saved map (logging the verification), scans a room, finishes, exits.
 struct AutoTestView: View {
   let continueLatest: Bool
+  var floorTest = false
   @State private var controller: CaptureController?
   @State private var failure: String?
 
@@ -136,7 +137,7 @@ struct AutoTestView: View {
     Group {
       if let controller {
         CaptureScreen(controller: controller) {}
-          .task { await run(controller) }
+          .task { if floorTest { await runFloor(controller) } else { await run(controller) } }
       } else {
         Text(failure ?? "Starting…").padding()
       }
@@ -164,11 +165,45 @@ struct AutoTestView: View {
         log("new house=\(house.id)")
         controller = try CaptureController.start(houseID: house.id, zoneID: zone.id)
       }
+      if floorTest, let c = controller {
+        var step = GuidedRoute.Step(id: "diagnostic-floor", title: "Floor checkpoint test", floor: "Test", instructions: "Move slowly around the room", overlap: "Fixed walls", doorState: "Still", checkpoints: [], mirrors: [], optional: false)
+        step.phase = "structure"; step.floorID = "diagnostic-floor"; step.areas = ["Test area"]
+        c.guidedContext = GuidedCaptureContext(routeID: "diagnostic-only", step: step, sequence: 1, houseID: c.plan.houseID, sessionID: c.plan.sessionID, zoneID: c.plan.zoneID, mirrorPreparation: "not-applicable", reflectiveGeometryNeedsReview: false, phase: "structure", floorID: "diagnostic-floor", attemptID: UUID().uuidString)
+        try c.guidedContext?.save(in: c.bundle.url)
+        c.floorCheckpointInterval = 20 // attended diagnostic only; normal floor scans use 120 seconds
+      }
     } catch {
       failure = error.localizedDescription
       log("setup failed: \(error.localizedDescription)")
       exit(1)
     }
+  }
+
+  @MainActor
+  private func runFloor(_ c: CaptureController) async {
+    try? await Task.sleep(for: .seconds(1))
+    c.roomName = "Floor checkpoint test · section 1"; c.startRoom()
+    let deadline = Date().addingTimeInterval(100)
+    while Date() < deadline && c.rooms.count < 2 && !c.sessionNeedsRestart {
+      try? await Task.sleep(for: .seconds(2))
+      log("FLOOR phase=\(c.phase) sections=\(c.rooms.count) walls=\(c.captureWallCount) depth=\(c.captureDepthCount) ready=\(c.captureReady)")
+    }
+    // Let an automatic section save finish before requesting the final save.
+    while c.phase == .finishingRoom, Date() < deadline.addingTimeInterval(30) { try? await Task.sleep(for: .milliseconds(200)) }
+    let autoResumed = c.rooms.count >= 2 && c.phase == .scanning
+    if c.phase == .scanning { c.finishFloor() }
+    else if c.phase == .betweenRooms { await c.finishSession() }
+    let finishDeadline = Date().addingTimeInterval(45)
+    while c.phase != .done, Date() < finishDeadline { try? await Task.sleep(for: .milliseconds(200)) }
+    let manifest = c.bundle.manifest
+    let passed = autoResumed && c.phase == .done && c.rooms.filter(\.hasMeasuredGeometry).count >= 2 &&
+      (manifest?.depthFrameCount ?? 0) > 0 && manifest?.structure != nil
+    let result: [String: Any] = ["passed": passed, "houseID": c.plan.houseID, "sessionID": c.plan.sessionID,
+      "sections": c.rooms.count, "automaticallyResumed": autoResumed, "depthFrames": manifest?.depthFrameCount ?? 0,
+      "structureSaved": manifest?.structure != nil, "diagnosticCheckpointSeconds": 20, "productionCheckpointSeconds": 120]
+    try? JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys]).write(to: GuidedRoute.documents.appendingPathComponent("floor-checkpoint-test.json"), options: .atomic)
+    log(passed ? "PASS: floor checkpoints saved and automatically resumed in one AR session" : "FAIL: floor checkpoint test did not produce all evidence")
+    exit(passed ? 0 : 1)
   }
 
   @MainActor
@@ -192,9 +227,13 @@ struct AutoTestView: View {
     }
     c.roomName = "Autotest"
     c.startRoom()
+    var sawNormalTracking = false
     for t in stride(from: 2, through: 24, by: 2) {
       try? await Task.sleep(for: .seconds(2))
       let meshes = c.arSession.currentFrame?.anchors.compactMap { $0 as? ARMeshAnchor } ?? []
+      if let frame = c.arSession.currentFrame, case .normal = frame.camera.trackingState { sawNormalTracking = true }
+      let images = (c.arSession.configuration as? ARWorldTrackingConfiguration)?.detectionImages.count ?? 0
+      log("camera tracking=\(String(describing: c.arSession.currentFrame?.camera.trackingState)) referenceImages=\(images) startupDelayed=\(c.cameraStartupDelayed)")
       log("t=\(t)s meshReady=\(c.meshReady) meshAnchors=\(meshes.count) verts=\(meshes.reduce(0) { $0 + $1.geometry.vertices.count }) meshArea=\(String(format: "%.2f", c.stats.meshArea)) percent=\(c.stats.percent) redSpots=\(c.stats.redSpots.count) photos=\(c.photoCount) walls=\(c.coverage.walls.count) hint=\(c.hint) instruction=\(c.instruction ?? "-") depth=\(c.arSession.currentFrame?.sceneDepth != nil) map=\(WorldMapFile.describe(c.mappingStatus))")
       if t == 10 {
         c.pause()
@@ -207,7 +246,12 @@ struct AutoTestView: View {
     let report = await withCheckedContinuation { k in c.engine.debugReport { k.resume(returning: $0) } }
     for line in report.split(separator: "\n").prefix(20) { log(String(line)) }
     c.finishRoom()
-    while c.phase != .betweenRooms { try? await Task.sleep(for: .milliseconds(200)) }
+    let finishDeadline = Date().addingTimeInterval(30)
+    while c.phase != .betweenRooms, Date() < finishDeadline { try? await Task.sleep(for: .milliseconds(200)) }
+    guard c.phase == .betweenRooms else {
+      log("FAIL: room completion timed out; files already written remain on the phone")
+      exit(1)
+    }
     if let r = c.rooms.last {
       log("room: file=\(r.file) data=\(r.data ?? "-") walls=\(r.walls) mesh=\(r.mesh.map { "\($0.vertices)v/\($0.faces)f" } ?? "none") coverage=\(r.coverage ?? -1) photoCoverage=\(r.photoCoverage ?? -1) photos=\(r.detailPhotos ?? 0)")
     }
@@ -227,9 +271,13 @@ struct AutoTestView: View {
     let files = (try? FileManager.default.contentsOfDirectory(atPath: c.bundle.file("mesh").path)) ?? []
     let size = files.compactMap { try? FileManager.default.attributesOfItem(atPath: c.bundle.file("mesh/\($0)").path)[.size] as? Int }
     log("mesh files: \(zip(files, size).map { "\($0.0) \($0.1 / 1024)KB" })")
+    let passed = sawNormalTracking && c.rooms.contains(where: \.hasMeasuredGeometry)
+      && (m?.photoCount ?? 0) > 0 && (m?.depthFrameCount ?? 0) > 0
+      && c.rooms.contains { ($0.mesh?.vertices ?? 0) > 0 && ($0.mesh?.faces ?? 0) > 0 }
+    log(passed ? "PASS: live tracking, measured geometry, photos and depth saved" : "FAIL: live capture did not produce all required evidence")
     log("DONE")
     try? await Task.sleep(for: .seconds(2))
-    exit(0)
+    exit(passed ? 0 : 1)
   }
 }
 

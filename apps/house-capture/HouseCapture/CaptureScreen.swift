@@ -8,6 +8,10 @@ struct CaptureScreen: View {
   let onClose: () -> Void
   @State private var reviewing = false
   @State private var confirmClose = false
+  @State private var showingDetails = false
+  @State private var savingDetailPass = false
+  @StateObject private var markers = CaptureMarkers()
+  @ObservedObject private var paired = PairedCaptureModel.shared
   @FocusState private var nameFocused: Bool
   @Environment(\.scenePhase) private var scenePhase
   static let roomSuggestions = ["Living room", "Kitchen", "Dining room", "Office", "Bedroom", "Primary bedroom", "Bathroom", "Hallway", "Basement", "Playroom", "Laundry", "Garage"]
@@ -32,15 +36,15 @@ struct CaptureScreen: View {
         Spacer()
         if scanning, let issue = controller.trackingIssue {
           VStack(alignment: .leading, spacing: 6) {
-            Label("Recovering your position", systemImage: "viewfinder.trianglebadge.exclamationmark")
+            Label(controller.cameraStartupDelayed ? "Camera isn't ready" : "Recovering your position", systemImage: "viewfinder.trianglebadge.exclamationmark")
               .font(.headline)
-            Text(issue.message).font(.subheadline)
-            Text("Recording is paused. Saved photos are safe; capture resumes when your position is stable.").font(.caption)
+            Text(controller.cameraStartupDelayed ? "Camera tracking hasn't started. Check that the rear lenses are uncovered. If Apple's Camera app is also black, restart the iPhone before trying this space again." : issue.message).font(.subheadline)
+            Text(controller.cameraStartupDelayed ? "This attempt hasn't measured a room. Ending it will keep diagnostic files without completing this space." : "Recording is paused. Saved photos are safe; capture resumes when your position is stable.").font(.caption)
             if let url = controller.recoveryPhoto, let image = UIImage(contentsOfFile: url.path) {
               Image(uiImage: image).resizable().scaledToFit().frame(height: 100)
               Text("Return to this view and pan slowly.").font(.caption)
             }
-            Button("Save what I have", action: controller.finishRoom)
+            Button(controller.cameraStartupDelayed ? "End this attempt" : "Save what I have", action: finishCapture)
           }
           .padding(12)
           .frame(maxWidth: 500, alignment: .leading)
@@ -55,6 +59,11 @@ struct CaptureScreen: View {
             .background(.orange.opacity(0.9), in: RoundedRectangle(cornerRadius: 10))
             .padding(.horizontal)
         }
+        if scanning, controller.checkingPostStartAlignment {
+          Text("Confirming position after camera setup. Keep looking at the previously scanned area; recording will begin when the match is stable.")
+            .font(.footnote).padding(12).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12)).padding(.horizontal)
+        }
+        if scanning, let progress = controller.detailProgress { RoomDetailGuidanceView(progress: progress) }
         bottomPanel
       }
       .padding(.bottom, 8)
@@ -77,10 +86,41 @@ struct CaptureScreen: View {
         NavigationStack { ScanReview(source: source).toolbar { Button("Done") { reviewing = false } } }
       }
     }
+    .sheet(isPresented: $showingDetails) { NavigationStack { ObjectDetailView(controller: controller, markers: markers) } }
     .onChange(of: controller.phase) { old, next in
-      if old == .finishingRoom, next == .betweenRooms, controller.reviewSource != nil, !controller.captureBudget.constrained { reviewing = true }
+      if old == .finishingRoom, next == .betweenRooms, savingDetailPass {
+        savingDetailPass = false
+        if !controller.rooms.isEmpty { Task { await controller.finishSession() } }
+      }
+      if old == .finishingRoom, next == .betweenRooms, !controller.sessionNeedsRestart, controller.reviewSource != nil, !controller.captureBudget.constrained, !controller.isFloorStructure, !controller.isGuidedDetail { reviewing = true }
     }
-    .onAppear { controller.begin() }
+    .onAppear { if controller.isFloorStructure { controller.scanView.useStructureAppearance() }; controller.configureReferences = { [weak markers] in markers?.apply(to: $0) }; controller.begin() }
+    .task {
+      while !Task.isCancelled {
+        controller.updateDetailGuidance()
+        if controller.phase == .betweenRooms || controller.phase == .scanning {
+          markers.observe(frame: controller.arSession.currentFrame, folder: controller.bundle.url,
+            roomIndex: controller.phase == .scanning ? controller.rooms.count : nil,
+            canRecord: controller.captureReady || controller.phase == .betweenRooms)
+        }
+        if paired.connected, !controller.captureBudget.constrained, controller.phase == .scanning,
+           let frame = controller.arSession.currentFrame {
+          let mesh = CaptureMeshPreview.sample(frame)
+          await paired.preview(["captureID": PairedCaptureModel.captureID(houseID: controller.plan.houseID,
+            sessionID: controller.plan.sessionID, legacyFolder: controller.bundle.url),
+            "roomName": controller.isFloorStructure ? controller.floorTitle : controller.roomName, "phase": controller.guidedContext?.step.phase ?? "capture", "tracking": controller.captureReady && !controller.paused ? "normal" : "limited",
+            "photoCount": controller.photoCount, "depthFrameCount": controller.captureDepthCount,
+            "photoCoverage": Double(controller.stats.percent)/100, "alignmentVerified": false,
+            "detailTargetCoverage": controller.detailProgress.map { Double($0.percent)/100 } as Any? ?? NSNull(),
+            "detailGuideRevision": controller.detailProgress?.guide.revision as Any? ?? NSNull(),
+            "detectedRoomID": controller.detailProgress?.detectedRoomID as Any? ?? NSNull(),
+            "roomLocationVerified": (controller.detailProgress?.locationReady ?? false) && !controller.paused,
+            "detailGuidance": controller.detailProgress?.instruction as Any? ?? NSNull(),
+            "vertices": mesh.vertices, "triangles": mesh.triangles])
+        }
+        do { try await Task.sleep(for: .seconds(1)) } catch { break }
+      }
+    }
     .onChange(of: scenePhase) { _, phase in
       // leaving the app interrupts the camera: don't keep counting coverage across the gap
       if phase != .active { controller.pause() }
@@ -100,10 +140,11 @@ struct CaptureScreen: View {
           .frame(width: 44, height: 44)
           .background(.ultraThinMaterial, in: Circle())
       }
+      .accessibilityLabel("Leave scanning")
       Spacer()
       VStack(alignment: .trailing, spacing: 6) {
         HStack(spacing: 10) {
-          if scanning {
+          if scanning && !controller.isFloorStructure && controller.detailProgress == nil {
             VStack(spacing: 3) {
               CoverageRing(percent: controller.stats.percent).frame(width: 44, height: 44)
               Text("Photo detail").font(.system(size: 9, weight: .semibold))
@@ -113,8 +154,8 @@ struct CaptureScreen: View {
           }
           VStack(alignment: .trailing, spacing: 2) {
             if scanning {
-              Text(controller.roomName).font(.headline)
-              Text(controller.meshReady ? "\(controller.coverage.walls.count) walls measured" : "Starting LiDAR…")
+              Text(controller.isFloorStructure ? controller.floorTitle : controller.roomName).font(.headline)
+              Text(controller.detailProgress != nil ? "Detail pass · photos save automatically" : controller.meshReady ? "\(controller.coverage.walls.count) walls measured" : "Starting LiDAR…")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
             }
@@ -141,7 +182,7 @@ struct CaptureScreen: View {
           .controlSize(.small)
           .tint(.green)
         }
-        if scanning {
+        if scanning && controller.detailProgress == nil {
           liveMap
         }
       }
@@ -171,18 +212,24 @@ struct CaptureScreen: View {
     case .betweenRooms:
       if controller.sessionNeedsRestart {
         panel {
-          Label("Scan ended", systemImage: "exclamationmark.triangle.fill").font(.headline)
-          Text("The phone lost its position. The available room data has been saved. Finish this session, then start a new capture from the house screen.")
+          Label(controller.rooms.isEmpty ? "Room wasn't captured" : "Scan ended", systemImage: "exclamationmark.triangle.fill").font(.headline)
+          Text(controller.rooms.isEmpty ? "The camera did not produce usable room geometry. Check Apple's Camera app; if its picture is black too, restart the iPhone. Return here to retry the same space." : "This section is saved. Keep it for Mac review before continuing. You do not need to repeat the whole floor. The Mac can recover usable sections even when alignment needs repair.")
             .font(.subheadline)
           roomList
-          Button("Finish and keep saved rooms") { Task { await controller.finishSession() } }
+          Button(controller.rooms.isEmpty ? "Keep diagnostics and close" : "Finish and keep saved rooms") {
+            Task {
+              await controller.finishSession()
+              if controller.rooms.isEmpty, controller.phase == .done { onClose() }
+            }
+          }
             .buttonStyle(.borderedProminent)
         }
-      } else { betweenRooms }
+      } else if let context = controller.guidedContext { guidedBetweenRooms(context) }
+      else { betweenRooms }
     case .scanning:
       if controller.paused { pausedPanel } else { scanControls }
     case .finishingRoom:
-      status("Saving \(controller.roomName)…")
+      status(controller.floorSavingCheckpoint ? "Saving a floor checkpoint. Pause walking; scanning resumes automatically…" : "Saving \(controller.roomName)…")
     case .finishing:
       status(controller.finishingStep.isEmpty ? "Saving…" : controller.finishingStep)
     case .done:
@@ -283,6 +330,47 @@ struct CaptureScreen: View {
     }
   }
 
+  private func guidedBetweenRooms(_ context: GuidedCaptureContext) -> some View {
+    panel {
+      Text(context.step.title).font(.title2.bold())
+      if controller.isFloorStructure { floorBetweenSections(context) }
+      else if controller.rooms.isEmpty {
+        if let progress = controller.detailProgress {
+          Text(progress.locationStatus).font(.subheadline.weight(.semibold))
+          Text("Check the reference overlay against fixed corners. When it lines up and you are inside \(progress.selectedRoom?.label ?? "this room"), start details. The old overlay then hides; red and green show only new photo coverage.").font(.subheadline)
+          Button("Overlay doesn't line up", systemImage: "arrow.clockwise", action: controller.rejectDetailAlignment)
+            .buttonStyle(.bordered)
+        }
+        Text(context.step.instructions).font(.subheadline)
+        Text("Include overlap: \(context.step.overlap)").font(.footnote)
+        Text("Doors: \(context.step.doorState)").font(.footnote)
+        if !context.step.mirrors.isEmpty {
+          Text(context.mirrorPreparation == "covered-matte" ? "Mirrors recorded as covered. Keep the covering still." : "Mirrors are uncovered. Reflected geometry will need correction.").font(.footnote)
+        }
+        Button(controller.isGuidedDetail ? "Start room details" : "Start this space", systemImage: "viewfinder", action: controller.startRoom)
+          .buttonStyle(.borderedProminent).controlSize(.large).disabled(!controller.canStartRoom)
+      } else {
+        Label(controller.detailProgress == nil ? "Space captured" : "Detail pass captured", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+        Text(controller.detailProgress.map { "\($0.percent)% of this room's planned views photographed. Save this pass and upload it. Remaining views stay on your room checklist." } ?? "Review the room before leaving. Save this session, upload it from the route, then continue to the next space.").font(.subheadline)
+        Button("Review saved room in 3D") { reviewing = true }.buttonStyle(.bordered)
+        Button(controller.detailProgress == nil ? "Save space and finish" : "Save pass · then upload") { Task { await controller.finishSession() } }
+          .buttonStyle(.borderedProminent).controlSize(.large)
+      }
+    }
+  }
+
+  @ViewBuilder private func floorBetweenSections(_ context: GuidedCaptureContext) -> some View {
+    if controller.rooms.isEmpty {
+      Text(context.step.isConnector ? "Start with the stair base and living-area approach. Capture steps, railings and fixed walls from stable positions, then finish with the upper landing and bedroom opening. Watch your footing between positions." : "Walk the whole floor, keeping the phone upright and pointing into the space. Follow wall edges, doorways and corners. Include each bathroom and return through the real doorway.").font(.subheadline)
+      Text("Sections save automatically every two minutes while tracking is stable. Pause walking when saving appears, then carry on. You do not need to name rooms or make objects turn green.").font(.footnote)
+      Button(controller.guidedContext?.step.isConnector == true ? (controller.isContinue ? "Resume stairs" : "Start stairs") : (controller.isContinue ? "Resume floor structure" : "Start floor structure"), systemImage: "viewfinder", action: controller.startRoom)
+        .buttonStyle(.borderedProminent).controlSize(.large).disabled(!controller.canStartRoom)
+    } else {
+      Text("\(controller.rooms.count) structural sections saved. Review the whole floor after saving; details come later.").font(.subheadline)
+      Button(context.step.isConnector ? "Save stairs and review" : "Save floor and review") { Task { await controller.finishSession() } }.buttonStyle(.borderedProminent)
+    }
+  }
+
   private func scannedHere(_ name: String) -> Bool {
     controller.rooms.contains { HouseProject.roomKey($0.name) == HouseProject.roomKey(name) }
   }
@@ -300,7 +388,7 @@ struct CaptureScreen: View {
       }
       .buttonStyle(.borderedProminent)
       .controlSize(.large)
-      Button("Finish room and save what is available", action: controller.finishRoom)
+      Button(controller.isGuidedDetail ? "Save pass" : controller.isFloorStructure ? "Finish floor and save" : "Finish room and save what is available", action: finishCapture)
         .buttonStyle(.bordered)
     }
   }
@@ -325,27 +413,54 @@ struct CaptureScreen: View {
 
   private var scanControls: some View {
     VStack(spacing: 10) {
-      if controller.captureReady {
-        tip(controller.quality.ready ? controller.quality.message : (controller.instruction ?? controller.quality.message))
-        if controller.coveragePlateau && !controller.quality.ready {
+      VStack(alignment: .leading, spacing: 4) {
+        HStack {
+          Text(!controller.isGuidedDetail ? "Structure: \(controller.captureWallCount) walls · \(controller.captureDepthCount) depth frames" : "\(controller.detailPassPhotoCount) photos this pass · \(Int(controller.detailActiveSeconds)/60)m \(Int(controller.detailActiveSeconds)%60)s")
+          Spacer()
+          Button("Object photos & cards", systemImage: "square.text.square") { showingDetails = true }.frame(minHeight: 44)
+        }
+        if controller.isFloorStructure {
+          Text("Structure pass · \(controller.rooms.count) checkpoints saved · details later")
+        } else if controller.detailProgress == nil { Text("Photos: \(controller.stats.percent)% of observed surfaces") }
+        if controller.detailProgress == nil { Text("Tracking: \(controller.captureReady ? "stable" : "recovering") · House alignment: needs calibration") }
+      }.font(.caption).padding(8).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+      if !controller.detailObjectName.isEmpty { Text("Object: \(controller.detailObjectName) · \(controller.detailView) · use shutter").font(.caption).padding(6).background(.regularMaterial) }
+      if let reason = controller.detailCheckpointReason {
+        VStack(alignment: .leading, spacing: 4) {
+          Label("Save & upload checkpoint", systemImage: "arrow.up.circle.fill").font(.subheadline.bold())
+          Text(reason).font(.caption)
+        }.padding(10).frame(maxWidth: .infinity, alignment: .leading).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
+      }
+      if controller.captureReady && !controller.isGuidedDetail {
+        tip(controller.isFloorStructure ? (controller.instruction ?? "Follow wall edges and openings. Walk into every area on this floor.") : controller.quality.ready ? controller.quality.message : (controller.instruction ?? controller.quality.message))
+        if !controller.isFloorStructure && controller.coveragePlateau && !controller.quality.ready {
           tip("Photo detail isn't improving much. You can save and review what you have; you don't need to keep circling.")
         }
         if controller.captureBudget.constrained { Text("Reducing background capture to keep scanning responsive.").font(.caption).foregroundStyle(.white) }
       }
       HStack(spacing: 14) {
-        Legend()
+        if controller.isFloorStructure {
+          Label("Measured", systemImage: "square.fill").font(.caption).foregroundStyle(.cyan)
+        } else { Legend() }
         Button(action: controller.pause) {
           Image(systemName: "pause.fill")
         }
         .buttonStyle(.bordered)
+        .accessibilityLabel("Pause capture")
+        .frame(minWidth: 44, minHeight: 44)
         shutter
-        Button(controller.quality.ready ? "Finish room ✓" : "Save room", action: controller.finishRoom)
+        Button(controller.isGuidedDetail ? "Save pass" : controller.isFloorStructure ? (controller.guidedContext?.step.isConnector == true ? "Finish stairs" : "Finish floor") : controller.quality.ready ? "Finish room ✓" : "Save room", action: finishCapture)
           .buttonStyle(.borderedProminent)
-          .tint(controller.quality.ready ? .green : .accentColor)
+          .tint(controller.detailProgress == nil && !controller.isFloorStructure && controller.quality.ready ? .green : .accentColor)
           .controlSize(.large)
       }
     }
     .padding(.horizontal)
+  }
+
+  private func finishCapture() {
+    if controller.isFloorStructure { controller.finishFloor() }
+    else { savingDetailPass = controller.isGuidedDetail; controller.finishRoom() }
   }
 
   private var shutter: some View {
@@ -371,16 +486,25 @@ struct CaptureScreen: View {
 
   private var done: some View {
     panel {
-      Label("Saved", systemImage: "checkmark.seal.fill").font(.headline).foregroundStyle(.green)
-      roomList
+      Label(controller.rooms.isEmpty ? "No room captured" : controller.floorPausedForResources ? "Floor paused · checkpoints saved" : "Saved", systemImage: controller.rooms.isEmpty ? "exclamationmark.triangle" : "checkmark.seal.fill")
+        .font(.headline).foregroundStyle(controller.rooms.isEmpty ? .orange : .green)
+      if controller.isFloorStructure {
+        Text("\(controller.rooms.count) checkpoints saved together for \(controller.floorTitle).")
+        if controller.floorPausedForResources {
+          Text("The app paused to keep capture responsive. Your floor is not marked complete. Return to the floor screen and choose Continue; start in the last area you scanned.").font(.subheadline)
+        }
+      } else if let progress = controller.detailProgress {
+        Text("\(progress.percent)% of planned views photographed in \(progress.selectedRoom?.label ?? "this room").")
+        Text("This pass is saved. Upload it, then continue missing views in this room or choose another room.").font(.subheadline)
+      } else { roomList }
       HStack(spacing: 8) {
         AlignmentBadge(alignment: controller.alignment)
         Text(controller.mapSummary ?? "Map not saved").font(.caption).foregroundStyle(.secondary)
       }
-      Text("Come back any time and tap **Scan a room**, or open a saved room and choose **Continue scanning from this room**. Share from the house screen (AirDrop the .zip to your Mac).")
+      Text(controller.rooms.isEmpty ? "Diagnostic files are kept. Return and retry this space; the route has not advanced." : controller.isFloorStructure ? "The floor capture is saved. Return to review its structure. Missing areas can be filled before you confirm the floor. A saved checkpoint alone does not mean the floor is complete." : controller.detailProgress != nil ? "The next screen shows Upload to Mac. Wait for Verified on Mac before putting the phone away." : controller.guidedContext == nil ? "Come back any time and tap **Scan a room**, or open a saved room and choose **Continue scanning from this room**. Share from the house screen (AirDrop the .zip to your Mac)." : "This space is saved on your iPhone. Return to the route to upload it and see the next space. Room alignment will be reviewed later.")
         .font(.footnote)
         .foregroundStyle(.secondary)
-      Button("Close", action: onClose).buttonStyle(.borderedProminent)
+      Button(controller.guidedContext == nil ? "Close" : controller.isFloorStructure ? "Return to floor scan" : "Return to room progress · upload", action: onClose).buttonStyle(.borderedProminent)
     }
   }
 
@@ -416,6 +540,13 @@ private struct RelocalizationPanel: View {
         if r.seconds > 0 { Text("\(r.seconds) s").font(.caption.monospacedDigit()).foregroundStyle(.secondary) }
       }
       Text(message).font(.subheadline)
+      if controller.detailProgress != nil, !controller.detailReferenceLabel.isEmpty {
+        Text("Recovery map: \(controller.detailReferenceLabel)").font(.caption.weight(.semibold))
+      }
+      if controller.detailProgress != nil, r.stage == .searching || r.stage == .checking {
+        Text("Use the wider doorway, pictures and furniture around you. A printed card identifies a checkpoint; it cannot locate the home until its physical position has been calibrated.")
+          .font(.caption).foregroundStyle(.secondary)
+      }
       if r.stage == .checking {
         ProgressView(value: Double(r.progress))
           .tint(.green)
@@ -434,7 +565,8 @@ private struct RelocalizationPanel: View {
       }
       Text(r.tracking + " · " + r.reference).font(.caption).foregroundStyle(.secondary)
       if !controller.landmarks.isEmpty, r.stage == .searching || r.stage == .mismatch {
-        Text("Spots you scanned before:").font(.caption.weight(.semibold))
+        Text(controller.detailProgress.map { "Reference views in \($0.selectedRoom?.label ?? "this room"):" } ?? "Spots you scanned before:")
+          .font(.caption.weight(.semibold))
         ScrollView(.horizontal, showsIndicators: false) {
           HStack(spacing: 6) {
             ForEach(controller.landmarks, id: \.self) { LandmarkThumb(url: $0) }
@@ -443,13 +575,17 @@ private struct RelocalizationPanel: View {
       }
       if r.seconds >= 20 || r.timedOut || r.stage == .mismatch {
         tips
+        if let next = controller.nextDetailReference {
+          Button("Try \(next.label)", action: controller.tryNextDetailReference)
+            .buttonStyle(.bordered).disabled(controller.switchingDetailReference)
+        }
       }
       if r.timedOut, r.stage != .mismatch {
         Text("Still can't find where you are.").font(.subheadline.weight(.semibold))
         HStack {
           Button("Keep trying", action: controller.keepTrying).buttonStyle(.bordered)
           Spacer()
-          Button("Start a fresh scan", action: controller.startUnaligned).buttonStyle(.borderedProminent)
+          if controller.detailProgress == nil { Button("Start a fresh scan", action: controller.startUnaligned).buttonStyle(.borderedProminent) }
         }
       } else {
         HStack {
@@ -457,7 +593,7 @@ private struct RelocalizationPanel: View {
             Button("Try again", action: controller.retryRelocalization).buttonStyle(.borderedProminent)
           }
           Spacer()
-          if r.seconds >= 20 || r.stage == .mismatch || isFailed {
+          if controller.detailProgress == nil, r.seconds >= 20 || r.stage == .mismatch || isFailed {
             Button("Start a fresh scan", action: controller.startUnaligned).buttonStyle(.bordered)
           }
         }
@@ -477,8 +613,8 @@ private struct RelocalizationPanel: View {
   private var title: String {
     switch r.stage {
     case .loadingMap: "Loading \(controller.zoneName)…"
-    case .searching: "Continue in \(controller.zoneName)"
-    case .checking: "Found it: checking the fit"
+    case .searching: controller.detailProgress.map { "Locate \($0.selectedRoom?.label ?? "this room")" } ?? "Continue in \(controller.zoneName)"
+    case .checking: "Checking the saved floor against this view"
     case .mismatch: "This doesn't line up"
     case .done: "Lined up"
     case .failed: "Can't continue from the saved map"
@@ -490,9 +626,9 @@ private struct RelocalizationPanel: View {
     case .loadingMap: "Reading the saved map."
     case .searching: "Point at an area you already scanned and move slowly. When the phone recognizes it, your earlier scan appears in green."
     case .checking: "Hold on the area you scanned before. The green should sit right on the walls and furniture."
-    case .mismatch: "The phone thinks it knows this place, but the green doesn't sit on the real surfaces. Try again from a spot with lots of detail, or start unaligned."
+    case .mismatch: controller.detailProgress != nil ? "The saved geometry does not line up with this view. Try again from one of this room's reference views. No room progress is being credited." : "The phone thinks it knows this place, but the green doesn't sit on the real surfaces. Try again from a spot with lots of detail, or start unaligned."
     case .done: ""
-    case .failed(let m): m + " You can still scan: the session gets its own frame. Use Connect room afterward to align it with another room."
+    case .failed(let m): controller.detailProgress != nil ? m : m + " You can still scan: the session gets its own frame. Use Connect room afterward to align it with another room."
     }
   }
 

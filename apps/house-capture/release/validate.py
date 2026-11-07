@@ -21,9 +21,12 @@ else:
             errors.append(f'Missing required reason for {category}')
     if privacy.get('NSPrivacyTracking') or privacy.get('NSPrivacyCollectedDataTypes'):
         errors.append('Re-audit store privacy answers: tracking or data collection declared')
-for key in ['NSLocalNetworkUsageDescription', 'NSAppTransportSecurity']:
-    if key in info:
-        errors.append(f'Remove unused network permission/exception: {key}')
+if not info.get('NSLocalNetworkUsageDescription'):
+    errors.append('Missing purpose string for optional paired Mac capture')
+if info.get('NSBonjourServices') != ['_housecapture._tcp']:
+    errors.append('Bonjour discovery must be restricted to the capture service')
+if 'NSAppTransportSecurity' in info:
+    errors.append('Remove unused App Transport Security exception')
 for resource in ['Support.json', 'PrivacyPolicy.json']:
     if not (app / resource).exists(): errors.append(f'Missing offline help resource: {resource}')
 for key in ['HouseCapturePrivacyURL', 'HouseCaptureSupportURL']:

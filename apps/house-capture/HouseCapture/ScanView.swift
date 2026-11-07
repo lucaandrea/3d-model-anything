@@ -107,6 +107,18 @@ final class ScanView: NSObject, ARSCNViewDelegate {
     engine.onMeshes = { [weak self] meshes in self?.apply(meshes) }
   }
 
+  func releaseResources() {
+    feed.isOn = false
+    view.delegate = nil
+    onSessionFailure = nil; onSessionEvent = nil
+    engine.onMeshes = nil
+    view.isPlaying = false
+    view.scene.rootNode.childNodes.forEach { $0.removeFromParentNode() }
+    nodes.removeAll(); waiting.removeAll()
+    outline.childNodes.forEach { $0.removeFromParentNode() }
+    ghost.geometry = nil; ghostEdges.geometry = nil
+  }
+
   // MARK: ghost of earlier scans
 
   var hasGhost: Bool { ghost.geometry != nil }
@@ -234,6 +246,13 @@ final class ScanView: NSObject, ARSCNViewDelegate {
   }
 
   // MARK: geometry
+
+  func useStructureAppearance() {
+    for material in materials {
+      material.diffuse.contents = UIColor.systemCyan
+      material.transparency = 0.18
+    }
+  }
 
   private func apply(_ meshes: [CoverageEngine.AnchorMesh]) {
     for m in meshes {

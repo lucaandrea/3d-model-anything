@@ -22,6 +22,8 @@ xcodebuild -project HouseCapture.xcodeproj -scheme HouseCapture -configuration R
 
 Or open the project in Xcode, pick your team under *Signing & Capabilities*, and run on the phone.
 
+This checkout is configured for Luca Andrea Collins (`9FNNQ6J269`) with bundle ID `ooo.luca.modelanything`. Release archives use the installed App Store distribution profile. See [the local setup guide](../../docs/luca-setup.md) for TestFlight, simulator checks and the separate development-certificate limitation.
+
 ## Rooms and scanning
 
 The Fieldwork house screen shows a numbered room library with previews rendered from saved scans. Open a room for an interactive 3D preview, photo-detail view, sharing, and scan history. Warm paper surfaces, ink typography, orange actions and ruled sections carry through the house library and room pages. Sessions and Recently Deleted are collapsed below the room library. Thumbnail rendering is serialized and caches only small images; scans without cached photo colours use neutral clay geometry. Tap **Scan a room** to begin; internal tracking groups are created automatically. Open a saved room and choose **Continue scanning from this room** to recognize that location before scanning nearby. Maps of 35 MB or more, or groups with four rooms, automatically start fresh. Matching room names within the house adds to the room's history, even across internal tracking groups.
@@ -98,7 +100,7 @@ relocalization went (seconds to *normal* / *verified*, residual) and periodic li
   (relocalize → verify → scan → finish), logging the relocalization.
 - `-diag`: probes how RoomPlan and ARKit's mesh/depth coexist on one ARSession (`DIAG:` lines).
 
-Read logs with `xcrun devicectl device process launch --console --device <id> com.wesbos.housecapture -autotest`.
+Read logs with `xcrun devicectl device process launch --console --device <id> ooo.luca.modelanything -autotest`.
 
 ## Tracking recovery and photo reliability
 
@@ -139,7 +141,7 @@ This benchmark uses photo poses without depth occlusion; it is not a live phone 
 
 ## Capture guidance and review
 
-**Photo detail** is the fraction of observed mesh area with useful photography, not the percentage of the room scanned. Inferred furniture backs, floors and ceilings do not reduce this number. Old scans also display their measured mesh coverage instead of the legacy mixed score. The finish recommendation checks measured walls, photo count and observed photo detail; it never blocks saving partial work. After two minutes with little progress, the app suggests inspecting gaps or saving rather than continuing indefinitely. Photo selection runs automatically in the background; there are no aiming markers or capture targets. Tracking loss pauses new capture and shows a recent reference photo to help recover the view. Saved data can still be kept.
+**Photo detail** is the fraction of observed mesh area with useful photography, not the percentage of the room scanned. Inferred furniture backs, floors and ceilings do not reduce this number. Old scans also display their measured mesh coverage instead of the legacy mixed score. The finish recommendation checks measured walls, photo count and observed photo detail; it never blocks saving partial work. After two minutes with little progress, the app suggests inspecting gaps or saving rather than continuing indefinitely. Photo selection runs automatically in the background. Reviewed-floor detail passes also show a verified room, planned-view percentage, missing-view directions and a room map; see [room-detail guidance](../../docs/room-detail-guidance.md). Manual passes without a reviewed guide do not claim room recognition. Tracking loss pauses new capture and shows a recent reference photo to help recover the view. Saved data can still be kept.
 
 Thermal pressure, memory warnings and long scans reduce depth recording, photo frequency and coverage evaluation work. High-resolution automatic photos are disabled under constrained budgets. After a large map or four rooms, save and start a fresh scan rather than extending the same map further.
 
@@ -147,8 +149,10 @@ After each room, **Review saved room in 3D** opens the textured preview. Use cov
 
 ## Sharing and importing
 
-Use the system share sheet to AirDrop exports or save them to Files. No Mac receiver or companion
-app is required. The iOS app does not make network requests or request local-network access.
+Use the system share sheet to AirDrop exports or save them to Files. AirDrop needs no Mac receiver
+or companion app. Optional **Paired capture** connects to House Control on a Mac over the local
+network for authenticated previews, card downloads and resumable saved-session transfers.
+See [paired scanning](../../docs/paired-scanning.md) for setup and physical acceptance checks.
 To review an exported room/session on another device, extract its ZIP in Files, then use the
 home screen's import button to select the folder containing `manifest.json`. Imports create a new
 house, preserve original room indices and scan coordinates, and never replace existing scans.

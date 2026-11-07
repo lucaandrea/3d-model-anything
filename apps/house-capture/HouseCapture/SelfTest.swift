@@ -1,4 +1,5 @@
 import ARKit
+import CaptureLink
 import SwiftUI
 import simd
 
@@ -51,6 +52,19 @@ final class SelfTest {
     expect(CaptureQuality(percent: 88, walls: 4, photos: 20).ready, "finish suggestion does not require inferred floor or ceiling coverage")
     let legacy = try JSONDecoder().decode(RoomRecord.self, from: Data(#"{"index":0,"name":"Play room","file":"room.json","usdz":"room.usdz","capturedAt":0,"walls":15,"doors":4,"windows":0,"openings":0,"objects":16,"coverage":0.82601947,"photoCoverage":53}"#.utf8))
     expect(legacy.photographedPercent == 83, "saved scans use measured coverage instead of legacy mixed percentage")
+    expect(legacy.hasMeasuredGeometry, "legacy measured room remains usable")
+    var emptyRoom = legacy
+    emptyRoom.walls = 0; emptyRoom.doors = 0; emptyRoom.windows = 0; emptyRoom.openings = 0; emptyRoom.objects = 0
+    expect(!emptyRoom.hasMeasuredGeometry, "empty RoomPlan JSON and USDZ paths cannot count as a captured room")
+    emptyRoom.detailPhotos = 12
+    expect(!emptyRoom.hasMeasuredGeometry, "reference photos alone cannot complete structural scanning")
+    expect(emptyRoom.hasDetailEvidence, "photo-only detail passes remain saveable and uploadable without claiming geometry")
+    var noEvidence = emptyRoom; noEvidence.detailPhotos = 0
+    expect(!noEvidence.hasDetailEvidence, "empty detail pass cannot count as saved reference evidence")
+    emptyRoom.mesh = .init(file: "mesh.ply", anchors: 1, vertices: 3, faces: 0)
+    expect(!emptyRoom.hasMeasuredGeometry, "vertices without mesh faces cannot complete a room")
+    emptyRoom.mesh?.faces = 1
+    expect(emptyRoom.hasMeasuredGeometry && !emptyRoom.hasRoomPlanGeometry, "partial LiDAR geometry remains usable without RoomPlan surfaces")
     expect(CaptureBudget(thermal: .serious, photos: 2, memoryPressure: false).depthInterval > 0.2, "warm phone reduces depth rate")
     expect(CaptureBudget(thermal: .nominal, photos: 2, memoryPressure: true).constrained, "memory pressure reduces capture work")
     var h = try HouseProject.create(name: "Experience selftest")
@@ -78,12 +92,326 @@ final class SelfTest {
     expect(h.rooms.first { $0.id == original.id }?.active?.index == 0 && h.deletedRooms.count == 1, "deleting active version restores previous version and remains recoverable")
   }
 
+  private func floorWorkflow() throws {
+    let previousRouteState = try? Data(contentsOf: GuidedRoute.stateURL)
+    defer {
+      if let previousRouteState { try? previousRouteState.write(to: GuidedRoute.stateURL, options: .atomic) }
+      else { try? FileManager.default.removeItem(at: GuidedRoute.stateURL) }
+    }
+    var step = GuidedRoute.Step(id: "ground", title: "Ground floor", floor: "Ground", instructions: "Walk the floor",
+      overlap: "Doorways", doorState: "Still", checkpoints: [], mirrors: [], optional: false)
+    step.phase = "structure"; step.floorID = "ground"; step.areas = ["Hall", "Living"]
+    let session = HouseProject.Session(id: "floor-part", zone: "ground-zone", startedAt: Date(), endedAt: Date(), alignment: .init(method: "first"), rooms: [0])
+    let room = RoomRecord(index: 0, name: "Section", file: "room.json", usdz: "room.usdz", capturedAt: Date(), walls: 4, doors: 1, windows: 1, openings: 1, objects: 0, mesh: .init(file: "mesh.ply", anchors: 1, vertices: 30, faces: 10))
+    let manifest = Manifest(createdAt: Date(), device: "fixture", systemVersion: "test", house: "test-house", session: session.id, zone: session.zone,
+      endedAt: Date(), rooms: [room], structure: "structure.json", photos: "photos/photos.json", photoCount: 0, depthFrameCount: 2)
+    let evidence = FloorStructureEvidence.evaluate(sessions: [session], manifests: [manifest], signatures: [session.id: "hash"], depthFrames: 2, merged: true, trackingDiscontinuity: false)
+    expect(evidence.usable, "structure data checks do not require object photos or photo coverage")
+    expect(!FloorStructureEvidence.evaluate(sessions: [], manifests: [], signatures: [:], depthFrames: 0, merged: false, trackingDiscontinuity: false).usable, "empty floor cannot pass structure checks")
+    var interrupted = session; interrupted.endedAt = nil
+    expect(!FloorStructureEvidence.evaluate(sessions: [interrupted], manifests: [manifest], signatures: [session.id: "hash"], depthFrames: 2, merged: true, trackingDiscontinuity: false).usable, "interrupted floor cannot pass checks")
+    var misplaced = session; misplaced.alignment = .init(method: "unaligned")
+    expect(!FloorStructureEvidence.evaluate(sessions: [misplaced], manifests: [manifest], signatures: [session.id: "hash"], depthFrames: 2, merged: true, trackingDiscontinuity: false).usable, "unaligned continuation cannot confirm a floor")
+    expect(!FloorStructureEvidence.evaluate(sessions: [session], manifests: [manifest], signatures: [session.id: "hash"], depthFrames: 2, merged: false, trackingDiscontinuity: false).usable, "failed merge cannot confirm a floor")
+    expect(!FloorStructureEvidence.evaluate(sessions: [session], manifests: [manifest], signatures: [session.id: "hash"], depthFrames: 2, merged: true, trackingDiscontinuity: true).usable, "tracking jump blocks confirmation")
+    expect(!FloorStructureEvidence.evaluate(sessions: [session], manifests: [manifest], signatures: [session.id: "hash"], depthFrames: 0, merged: true, trackingDiscontinuity: false).usable, "missing depth cannot pass structure checks")
+    var review = FloorStructureReview(routeID: "test-route", stepID: step.id, houseID: "test-house", sessionIDs: [session.id], captureSignatures: evidence.signatures, reviewedAreas: ["Hall"], boundariesReviewed: true, openingsReviewed: true, reflectionsReviewed: true, reviewedAt: Date())
+    expect(!review.matches(routeID: "test-route", step: step, houseID: "test-house", evidence: evidence), "all physical areas need explicit review")
+    review.reviewedAreas.insert("Living")
+    expect(review.matches(routeID: "test-route", step: step, houseID: "test-house", evidence: evidence), "complete review unlocks usable structure")
+    var changed = evidence; changed.signatures[session.id] = "replacement"
+    expect(!review.matches(routeID: "test-route", step: step, houseID: "test-house", evidence: changed), "replacement capture invalidates prior floor review")
+    changed = evidence; changed.sessionIDs.append("new-part")
+    expect(!review.matches(routeID: "test-route", step: step, houseID: "test-house", evidence: changed), "a continuation requires a new whole-floor review")
+    review.reflectionsReviewed = false
+    expect(!review.matches(routeID: "test-route", step: step, houseID: "test-house", evidence: evidence), "unreviewed reflections block structure confirmation")
+    expect(FloorCapturePolicy.checkpointDue(elapsed: 120, tracking: true, paused: false, walls: 1), "floor checkpoints due after bounded stable capture")
+    expect(!FloorCapturePolicy.checkpointDue(elapsed: 120, tracking: false, paused: false, walls: 4), "lost tracking never triggers automatic checkpoint restart")
+    expect(!FloorCapturePolicy.checkpointDue(elapsed: 120, tracking: true, paused: true, walls: 4), "pause does not trigger automatic checkpoint")
+    expect(!FloorCapturePolicy.checkpointDue(elapsed: 120, tracking: true, paused: false, walls: 0), "empty capture cannot trigger checkpoint loop")
+    expect(FloorCapturePolicy.acceptsResumeMap(bytes: 54_390_201), "real six-minute floor map can resume above legacy 40 MB cutoff")
+    expect(!FloorCapturePolicy.shouldPause(sections: 3, mapBytes: 54_390_201, memoryWarning: false), "third checkpoint does not end a healthy floor capture")
+    expect(FloorCapturePolicy.shouldPause(sections: 3, mapBytes: 128_000_000, memoryWarning: false), "floor map pause budget remains bounded")
+    expect(FloorCapturePolicy.shouldPause(sections: 3, mapBytes: 54_390_201, memoryWarning: true), "real memory pressure pauses after saved checkpoint")
+    expect(FloorCapturePolicy.shouldPause(sections: 12, mapBytes: 1, memoryWarning: false), "long floor session pauses at checkpoint count budget")
+    expect(!FloorCapturePolicy.acceptsResumeMap(bytes: 0) && !FloorCapturePolicy.acceptsResumeMap(bytes: 256_000_001), "empty and oversized maps cannot be loaded")
+    var detail = step; detail.id = "hall-detail"; detail.phase = "details"; detail.areas = nil
+    var route = GuidedRoute(id: "test-route", title: "Test floors", steps: [step, detail])
+    try route.validate()
+    expect(try JSONDecoder().decode(GuidedRoute.self, from: JSONEncoder().encode(route)) == route, "floor route round-trips phases and physical area checklist")
+    route.steps = [detail, step]
+    do { try route.validate(); expect(false, "details cannot precede a floor structure step") } catch { expect(true, "details cannot precede a floor structure step") }
+    var h = try HouseProject.create(name: "Floor workflow selftest")
+    defer { try? FileManager.default.removeItem(at: h.url) }
+    let zone = h.addZone(named: "floor")
+    h.beginSession(id: "pending", zone: zone.id, alignment: .init(method: "first")); try h.save()
+    let bundle = try ScanBundle.create(in: h, id: "pending")
+    let ctx = GuidedCaptureContext(routeID: route.id, step: step, sequence: 1, houseID: h.id, sessionID: "pending", zoneID: zone.id,
+      mirrorPreparation: "covered-matte", reflectiveGeometryNeedsReview: false, phase: "structure", floorID: "ground", attemptID: "attempt")
+    try ctx.save(in: bundle.url)
+    expect(!FloorStructureReview.permitsUpload(house: h, session: h.sessions[0]), "incomplete session cannot freeze an upload package")
+    for i in 0..<3 { _ = h.recordRoomScan(name: "Section \(i + 1)", session: "pending", index: i, capturedAt: Date(), matchName: false) }
+    try h.save()
+    let groups = FloorScanLibrary.groups(in: h)
+    expect(groups.count == 1 && groups[0].checkpointCount == 3 && groups[0].roomIDs.count == 3, "three automatic checkpoints appear as one logical floor without changing originals")
+    expect(FloorScanLibrary.summary(house: h, groups: groups) == "1 floor capture · 3 checkpoints", "floor library does not call checkpoints separate rooms")
+    expect(FloorScanLibrary.continuation(house: h, roomID: h.rooms[1].id, zoneID: zone.id)?.attemptID == "attempt", "legacy checkpoint Continue restores its floor attempt")
+    expect(FloorScanLibrary.continuation(house: h, roomID: nil, zoneID: zone.id)?.step.isStructure == true, "house Continue routes to floor mode")
+    h.beginSession(id: "resumed", zone: zone.id, alignment: .init(method: "relocalized"))
+    let resumed = try ScanBundle.create(in: h, id: "resumed")
+    var next = ctx; next.sessionID = "resumed"; try next.save(in: resumed.url)
+    _ = h.recordRoomScan(name: "Section 4", session: "resumed", index: 0, capturedAt: Date(), matchName: false)
+    try h.save()
+    expect(FloorScanLibrary.groups(in: h).count == 1 && FloorScanLibrary.groups(in: h)[0].checkpointCount == 4, "continuation sessions stay in the same floor group")
+    next.attemptID = "fresh-attempt"; try next.save(in: resumed.url)
+    expect(FloorScanLibrary.groups(in: h).count == 2, "fresh attempts remain separate and retain earlier checkpoints")
+    next.houseID = "wrong-house"; try next.save(in: resumed.url)
+    expect(FloorScanLibrary.groups(in: h).count == 1 && FloorScanLibrary.groups(in: h)[0].checkpointCount == 3, "mismatched context cannot take over a floor")
+    let model = GuidedRouteModel(); model.route = route; model.state = .init(routeID: route.id); model.house = h
+    model.sessions = [step.id: session]; model.floorCaptures = [step.id: [session]]; model.floorEvidence = [step.id: evidence]
+    expect(!model.completed(step) && !model.detailsUnlocked, "saved measurements alone do not unlock details")
+    var gate = AlignmentContinuity(); gate.beginConfirmation(required: true)
+    for _ in 0..<2 { gate.observe(known: 100, matches: true, mismatch: false) }
+    expect(gate.awaitingConfirmation, "two post-configuration matches cannot start capture")
+    gate.observe(known: 100, matches: true, mismatch: false)
+    expect(!gate.awaitingConfirmation && !gate.invalidated, "three stable post-configuration matches authorize capture")
+    for _ in 0..<3 { gate.observe(known: 100, matches: false, mismatch: true) }
+    expect(gate.invalidated, "persistent live frame mismatch invalidates earlier relocalization")
+    gate.observe(known: 100, matches: true, mismatch: false)
+    expect(gate.invalidated, "invalidated alignment cannot silently recover in the same capture")
+    var connector = step; connector.id = "stairs-structure"; connector.phase = "connector"
+    try GuidedRoute(id: "test-route", title: "Floors and stairs", steps: [step,connector,detail]).validate()
+    expect(connector.isStructure && connector.isConnector, "stairs preserve structural checkpointing and a separate route identity")
+    var stairManifest = manifest; stairManifest.rooms[0].walls = 0
+    expect(FloorStructureEvidence.evaluate(sessions: [session], manifests: [stairManifest], signatures: [session.id: "hash"], depthFrames: 2, merged: false, trackingDiscontinuity: false, isConnector: true).usable, "stairs retain usable mesh and depth without requiring a flat RoomPlan floor merge")
+    expect(!FloorStructureEvidence.evaluate(sessions: [session], manifests: [stairManifest], signatures: [session.id: "hash"], depthFrames: 2, merged: false, trackingDiscontinuity: false).usable, "connector rules do not weaken normal floor evidence")
+    let hash = String(repeating: "a", count: 64)
+    let correctedRoute = GuidedRoute(id: ctx.routeID, title: "Reviewed floors", steps: [connector, step, detail])
+    let entry = CaptureRouteReview.Entry(sessionID: ctx.sessionID, originalStepID: ctx.step.id, stepID: connector.id, attemptID: "reviewed-attempt", manifestSHA256: hash, contextSHA256: hash, reason: "Geometry and photographs reviewed on Mac")
+    var correction = CaptureRouteReview(format: "capture-route-review/1", houseID: ctx.houseID, routeID: ctx.routeID, entries: [entry])
+    let resolved = correction.resolve(ctx, route: correctedRoute, manifestHash: hash, contextHash: hash)
+    expect(resolved?.step.id == connector.id && resolved?.zoneID == ctx.zoneID && resolved?.alignmentVerified == false, "reviewed label correction preserves the original coordinate frame and calibration status")
+    expect(correction.resolve(ctx, route: correctedRoute, manifestHash: String(repeating: "b", count: 64), contextHash: hash) == nil, "changed capture cannot reuse a Mac route correction")
+    expect(correction.resolve(ctx, route: correctedRoute, manifestHash: hash, contextHash: String(repeating: "b", count: 64)) == nil, "changed original route invalidates its correction")
+    correction.entries.append(entry)
+    expect(correction.resolve(ctx, route: correctedRoute, manifestHash: hash, contextHash: hash) == nil, "duplicate route corrections cannot silently choose an assignment")
+    gate.beginConfirmation(required: true)
+    expect(gate.awaitingConfirmation && !gate.invalidated, "a new checkpoint reconfiguration requires fresh alignment evidence")
+    var fixedEvidence = evidence; fixedEvidence.signatures = [session.id: hash]
+    var mac = FloorMacReview(routeID: route.id, stepID: step.id, houseID: h.id, sessionIDs: [session.id], captureSignatures: fixedEvidence.signatures, reviewedAreas: Set(step.areas ?? []), modelFile: "floor.usdz", modelSHA256: hash, verifiedBackupFiles: 10, verifiedBackupBytes: 100, registrationMethod: "overlap", notes: ["Physical checks pending"])
+    expect(mac.matches(routeID: route.id, step: step, houseID: h.id, evidence: fixedEvidence), "Mac review binds exact source manifests without claiming physical calibration")
+    fixedEvidence.signatures[session.id] = String(repeating: "b", count: 64)
+    expect(!mac.matches(routeID: route.id, step: step, houseID: h.id, evidence: fixedEvidence), "changed source invalidates corrected Mac result")
+    fixedEvidence.signatures[session.id] = hash; mac.modelFile = "../floor.usdz"
+    expect(!mac.matches(routeID: route.id, step: step, houseID: h.id, evidence: fixedEvidence), "Mac preview path cannot escape its review folder")
+    mac.modelFile = "floor.usdz"; model.macReviews[step.id] = mac
+    expect(model.completed(step) && model.detailAvailable(detail), "reviewed ground floor unlocks its details independently")
+    var upper = step; upper.id = "upper"; upper.floorID = "upper"
+    model.route = .init(id: route.id, title: "Choice", steps: [step,connector,upper,detail])
+    expect(!model.detailsUnlocked && model.detailAvailable(detail), "upstairs can remain pending while downstairs details are available")
+    model.selectDetail(detail); expect(model.current?.id == detail.id, "user can select downstairs details before stairs")
+    model.nextStructure(); expect(model.current?.id == connector.id, "structure choice returns to stairs without losing the floor review")
+    var secondPass = session; secondPass.id = "second-detail-pass"
+    model.sessions[detail.id] = secondPass
+    model.detailCaptures[detail.id] = [session, secondPass]
+    model.state?.uploadDeferred.formUnion([session.id, secondPass.id])
+    expect(model.captures(for: detail).map(\.id) == [session.id, secondPass.id], "every saved detail pass remains available for upload")
+    expect(model.completed(detail), "explicit offline continuation preserves the previous route behavior")
+    model.selectDetail(detail)
+    expect(model.current?.id == detail.id, "a transferred or deferred partial room stays available for more detail")
+    expect(DetailCaptureCheckpoint.reason(activeSeconds: 180, photos: 0, remaining: 2, constrained: true, stalledSeconds: 100) == nil, "no-photo pass never receives an upload-ready reminder")
+    expect(DetailCaptureCheckpoint.reason(activeSeconds: 20, photos: 10, remaining: 2, constrained: false, stalledSeconds: 0) == nil, "fresh productive pass has no premature checkpoint reminder")
+    expect(DetailCaptureCheckpoint.reason(activeSeconds: 180, photos: 10, remaining: 2, constrained: false, stalledSeconds: 0) != nil, "three active minutes recommends saving a resumable pass")
+    expect(DetailCaptureCheckpoint.reason(activeSeconds: 180, photos: 10, remaining: -1, constrained: false, stalledSeconds: 0) != nil, "manual detail passes also receive timed upload reminders without invented target counts")
+    expect(DetailCaptureCheckpoint.reason(activeSeconds: 50, photos: 120, remaining: 2, constrained: false, stalledSeconds: 0) != nil, "large photo pass recommends upload before pressure grows")
+    expect(DetailCaptureCheckpoint.reason(activeSeconds: 50, photos: 10, remaining: 2, constrained: true, stalledSeconds: 0) != nil, "resource pressure recommends a checkpoint")
+    expect(DetailCaptureCheckpoint.reason(activeSeconds: 90, photos: 10, remaining: 2, constrained: false, stalledSeconds: 60) != nil, "stalled detail coverage suggests a different view or checkpoint")
+    expect(DetailCaptureCheckpoint.reason(activeSeconds: 50, photos: 10, remaining: 0, constrained: false, stalledSeconds: 0)?.contains("hidden") == true, "known target completion still calls for a hidden-object check")
+    let target = RoomDetailGuide.Target(id: "target", label: "Desk front", kind: "object", position: [0,1,-1], normal: [0,0,1])
+    let region = RoomDetailGuide.Room(id: detail.id, label: "Hall", polygon: [[-2,-2],[2,-2],[2,2],[-2,2]], minY: 0, maxY: 2.5, targets: [target])
+    var guide = RoomDetailGuide(format: "room-detail-guide/1", revision: "test-guide", houseID: h.id, floorStepID: step.id, modelFromReference: matrix_identity_float4x4.columnMajor, referenceMap: "ref.arworldmap", referenceMapSHA256: hash, referenceMesh: "ref.ply", referenceMeshSHA256: hash, rooms: [region])
+    try guide.validate()
+    expect(guide.room(at: [0,1,0])?.id == detail.id && guide.room(at: [1.95,1,0]) == nil, "room recognition excludes doorway and boundary uncertainty")
+    expect(guide.room(at: [0,3,0]) == nil, "room recognition rejects another floor elevation")
+    guide.modelFromReference = [1]
+    do { try guide.validate(); expect(false, "short coordinate matrix rejected without crashing") } catch { expect(true, "short coordinate matrix rejected without crashing") }
+    guide.modelFromReference = matrix_identity_float4x4.columnMajor
+    let progress = RoomDetailProgress(guide: guide, selectedRoomID: detail.id, folder: h.url, progressURL: h.url.appendingPathComponent("test-detail-progress.json"))
+    var camera = matrix_identity_float4x4; camera.columns.3.y = 1
+    progress.update(camera: camera, localized: false)
+    expect(!progress.locationReady && progress.percent == 0, "selected room and saved structure alone cannot credit photographic targets")
+    for _ in 0..<3 { progress.update(camera: camera, localized: true) }
+    expect(progress.locationReady, "stable measured location recognizes the selected room")
+    progress.update(camera: camera, localized: false)
+    expect(!progress.locationReady && progress.detectedRoomID == nil && progress.nextTarget == nil && progress.cameraInModel == nil, "tracking loss immediately suspends room claims, map position and guidance")
+    var ph = CoverageEngine.Photo(worldToCamera: camera.inverse, position: [0,1,0], fx: 100, fy: 100, cx: 50, cy: 50, width: 100, height: 100, sharpness: 1, depth: nil, room: 0)
+    expect(!RoomDetailProgress.depthSupports(ph, point: [0,1,-1]), "missing depth cannot credit a known detail target")
+    ph.depth = .init(width: 1, height: 1, values: [0.3], worldToCamera: camera.inverse, fx: 1, fy: 1, cx: 0, cy: 0)
+    expect(!RoomDetailProgress.depthSupports(ph, point: [0,1,-1]), "foreground occlusion prevents detail credit")
+    ph.depth?.values = [1]
+    expect(RoomDetailProgress.depthSupports(ph, point: [0,1,-1]), "measured target depth permits photographic scoring")
+    for _ in 0..<3 { progress.update(camera: camera, localized: true) }
+    ph.fx = 500; ph.fy = 500
+    let testBundle = h.url.appendingPathComponent("detail-test-bundle")
+    try FileManager.default.createDirectory(at: testBundle, withIntermediateDirectories: true)
+    ph.sharpness = 0.2
+    for _ in 0..<10 { progress.record(ph, bundle: testBundle) }
+    expect(progress.percent == 0, "repeated weak photographs never accumulate to completed detail coverage")
+    ph.sharpness = 1; progress.record(ph, bundle: testBundle)
+    expect(progress.percent == 100 && progress.needsViews == 0, "sharp visible depth-supported target earns known-target credit")
+    let restored = RoomDetailProgress(guide: guide, selectedRoomID: detail.id, folder: h.url, progressURL: h.url.appendingPathComponent("test-detail-progress.json"))
+    expect(restored.percent == 100 && !restored.locationReady, "detail coverage persists but live location never survives restart")
+    var referenceFromSession = simd_float4x4(simd_quatf(angle: .pi/4, axis: [0,1,0]))
+    referenceFromSession.columns.3 = [4,0,-3,1]
+    let record = DetailSessionReference(guideSHA256: guide.fingerprint, referenceID: "earlier-room-map", mapSHA256: hash, referenceFromSession: referenceFromSession.columnMajor)
+    let alternate = RoomDetailProgress(guide: guide, selectedRoomID: detail.id, folder: h.url, progressURL: h.url.appendingPathComponent("alternate-progress.json"), sessionReference: record)
+    let alternateCamera = referenceFromSession.inverse*camera
+    for _ in 0..<3 { alternate.update(camera: alternateCamera, localized: true) }
+    expect(alternate.locationReady && simd_distance(alternate.cameraInModel ?? .zero,[0,1,0]) < 0.001, "an earlier map locates the same room through its explicit rigid transform")
+    var alternatePhoto = ph
+    alternatePhoto.position = simd_make_float3(alternateCamera.columns.3)
+    alternatePhoto.worldToCamera = alternateCamera.inverse
+    alternatePhoto.depth?.worldToCamera = alternateCamera.inverse
+    // Keep this one-pixel fixture's target inside its pixel, not on the zero edge
+    // where floating-point roundoff after rotation legitimately falls outside.
+    alternatePhoto.depth?.cx = 0.5; alternatePhoto.depth?.cy = 0.5
+    expect(RoomDetailProgress.depthSupports(alternatePhoto, point: simd_make_float3(referenceFromSession.inverse*SIMD4<Float>(0,1,-1,1))), "depth lookup preserves the target across the earlier map transform")
+    alternate.record(alternatePhoto, bundle: testBundle)
+    expect(alternate.percent == 100, "photo target scoring composes the earlier map transform with camera and depth poses")
+    let scope = alternate.reviewedScope!
+    let expectedTarget = simd_make_float3(referenceFromSession.inverse*SIMD4<Float>(0,1,-1,1))
+    expect(simd_distance(scope.targets[0].position, expectedTarget)<0.001, "live coverage and saved photo scoring use the same alternate-map target")
+    expect(scope.outline.count == 4 && abs(scope.floor)<0.001 && abs(scope.ceiling-2.5)<0.001, "alternate-map room bounds preserve the actual vertical range")
+    var upstairsGuide = guide
+    upstairsGuide.rooms[0].minY = 3; upstairsGuide.rooms[0].maxY = 5.5
+    upstairsGuide.modelFromReference[13] = 1.5
+    let upstairsProgress = RoomDetailProgress(guide: upstairsGuide, selectedRoomID: detail.id, folder: h.url, progressURL: h.url.appendingPathComponent("upstairs-scope.json"), sessionReference: record)
+    let upstairsScope = upstairsProgress.reviewedScope!
+    expect(abs(upstairsScope.floor-1.5)<0.001 && abs(upstairsScope.ceiling-4)<0.001, "upstairs scope starts at the upstairs elevation, not model zero")
+    var directionGuide = guide
+    directionGuide.rooms[0].targets[0].position = [1,1,-1]
+    let directions = RoomDetailProgress(guide: directionGuide, selectedRoomID: detail.id, folder: h.url, progressURL: h.url.appendingPathComponent("directions.json"))
+    let portraitSensor = camera * simd_float4x4(simd_quatf(angle: -.pi/2, axis: [0,0,1]))
+    for _ in 0..<3 { directions.update(camera: portraitSensor, viewFromSession: camera.inverse, localized: true) }
+    expect(directions.instruction.hasPrefix("Look right"), "portrait guidance follows screen right, not the rotated sensor x axis")
+    directionGuide.rooms[0].targets[0].position = [0,2,-1]
+    let upDirections = RoomDetailProgress(guide: directionGuide, selectedRoomID: detail.id, folder: h.url, progressURL: h.url.appendingPathComponent("up-directions.json"))
+    for _ in 0..<3 { upDirections.update(camera: portraitSensor, viewFromSession: camera.inverse, localized: true) }
+    expect(upDirections.instruction.hasPrefix("Aim higher"), "portrait guidance follows screen up")
+    var occlusion = ph.depth!; occlusion.values = [0.3]; occlusion.fx = 0.1; occlusion.fy = 0.1; occlusion.cx = 0.5; occlusion.cy = 0.5
+    for _ in 0..<3 { directions.update(camera: portraitSensor, viewFromSession: camera.inverse, liveDepth: occlusion, localized: true) }
+    expect(directions.nextTarget == nil && directions.instruction.contains("accessible"), "guidance never points through a measured foreground obstacle")
+    expect(RoomDetailProgress.occluded([1,1,-1], by: nil) == false, "missing depth alone cannot invent an occluder")
+    expect(alternate.photoFeedback.contains("completed"), "a newly credited photo provides immediate progress feedback")
+    alternate.record(alternatePhoto, bundle: testBundle)
+    expect(alternate.percent == 100 && alternate.photoFeedback.contains("Photo saved for the model"), "a repeated useful photo is saved without inventing new completion")
+    let sameProgress = RoomDetailProgress(guide: guide, selectedRoomID: detail.id, folder: h.url, progressURL: h.url.appendingPathComponent("alternate-progress.json"))
+    expect(sameProgress.percent == 100 && !sameProgress.locationReady, "changing recovery maps preserves target progress without preserving a location claim")
+    let savedReference = try JSONDecoder().decode(DetailSessionReference.self, from: Data(contentsOf: testBundle.appendingPathComponent("detail-reference.json")))
+    expect(savedReference.referenceFromSession == record.referenceFromSession && savedReference.mapSHA256 == hash, "capture exports preserve the actual session-to-reference transform and map identity")
+    expect(savedReference.guideSHA256 == RoomDetailGuide.hash(try Data(contentsOf: testBundle.appendingPathComponent("detail-guide.json"))), "session reference hashes the exact canonical guide included in the capture")
+    var denseGuide = guide
+    denseGuide.rooms[0].targets = (0..<201).map { i in
+      var item = target; item.id = "dense-\(i)"; return item
+    }
+    let denseProgress = RoomDetailProgress(guide: denseGuide, selectedRoomID: detail.id, folder: h.url, progressURL: h.url.appendingPathComponent("dense-test.json"))
+    for item in denseGuide.rooms[0].targets.dropLast() { denseProgress.saved.quality[item.id] = 1 }
+    expect(denseProgress.percent == 99 && denseProgress.needsViews == 1, "progress cannot round up to 100 while a planned view remains")
+    var otherRoom = region; otherRoom.id = "adjacent"; otherRoom.label = "Kitchen"
+    otherRoom.polygon = [[3,-2],[7,-2],[7,2],[3,2]]
+    otherRoom.targets[0].id = "adjacent-target"
+    var twoRoomGuide = guide; twoRoomGuide.rooms.append(otherRoom)
+    let twoRooms = RoomDetailProgress(guide: twoRoomGuide, selectedRoomID: detail.id, folder: h.url, progressURL: h.url.appendingPathComponent("two-room-test.json"))
+    var otherCamera = camera; otherCamera.columns.3.x = 4
+    for _ in 0..<3 { twoRooms.update(camera: otherCamera, localized: true) }
+    expect(twoRooms.detectedRoomName == "Kitchen" && !twoRooms.locationReady && twoRooms.instruction.contains("choose that room"), "room change names the observed room and pauses the selected room's progress")
+    twoRooms.record(ph, bundle: testBundle)
+    expect(twoRooms.percent == 0, "wrong-room observation cannot earn selected room credit")
+    guide.revision = "replacement-guide"
+    let replaced = RoomDetailProgress(guide: guide, selectedRoomID: detail.id, folder: h.url, progressURL: h.url.appendingPathComponent("test-detail-progress.json"))
+    expect(replaced.percent == 0, "changed geometry guide invalidates previous target progress")
+    guide.revision = "test-guide"; guide.rooms[0].targets[0].position[0] += 0.1
+    let movedGuide = RoomDetailProgress(guide: guide, selectedRoomID: detail.id, folder: h.url, progressURL: h.url.appendingPathComponent("test-detail-progress.json"))
+    expect(movedGuide.percent == 0, "same revision with changed target geometry also invalidates progress")
+    var secondRegion = guide.rooms[0]; secondRegion.id = "different-room"; guide.rooms.append(secondRegion)
+    do { try guide.validate(); expect(false, "target identities must be unique across rooms") } catch { expect(true, "target identities must be unique across rooms") }
+
+
+
+  }
+
+  private func guidedRouteAndArchive() throws {
+    let first = GuidedRoute.Step(id: "entry", title: "Entrance & office", floor: "Ground floor",
+      instructions: "Scan the entrance then the office.", overlap: "Include the real hall opening.",
+      doorState: "Closet closed", checkpoints: ["C001"],
+      mirrors: [.init(id: "mirror-entry", label: "Closet panel", cardID: "D059")], optional: false)
+    var second = first; second.id = "hall"; second.title = "Hallway"; second.mirrors = []; second.optional = true
+    let route = GuidedRoute(id: "test-route", title: "Test route", steps: [first, second])
+    try route.validate()
+    expect(try JSONDecoder().decode(GuidedRoute.self, from: JSONEncoder().encode(route)) == route, "guided route preserves walking order and reflective-surface labels")
+    var duplicate = route; duplicate.steps.append(first)
+    do { try duplicate.validate(); expect(false, "duplicate route IDs reject") } catch { expect(true, "duplicate route IDs reject") }
+    let session = HouseProject.Session(id: "step-session", zone: "new-zone", startedAt: Date(), endedAt: Date(), alignment: .init(method: "first"), rooms: [0])
+    var state = GuidedRouteState(routeID: route.id)
+    expect(!state.mayAdvance(step: first, session: nil, verifiedOnMac: true), "a receipt without a saved capture cannot advance the route")
+    expect(!state.mayAdvance(step: first, session: session, verifiedOnMac: false), "a saved space waits for upload by default")
+    expect(state.mayAdvance(step: first, session: session, verifiedOnMac: true), "checksum receipt advances a saved space")
+    var unfinished = session; unfinished.endedAt = nil
+    expect(!state.mayAdvance(step: first, session: unfinished, verifiedOnMac: true), "unfinished capture never advances")
+    var empty = session; empty.rooms = []
+    expect(!state.mayAdvance(step: first, session: empty, verifiedOnMac: true), "empty session never advances")
+    state.uploadDeferred.insert(session.id)
+    expect(state.mayAdvance(step: first, session: session, verifiedOnMac: false), "explicit offline continuation preserves an upload-due state")
+    var other = session; other.id = "other-session"
+    expect(!state.mayAdvance(step: first, session: other, verifiedOnMac: false), "old upload deferral cannot advance a replacement session")
+    state.skipped.insert(first.id); state.skipped.insert(second.id)
+    expect(!state.mayAdvance(step: first, session: nil, verifiedOnMac: false), "required route spaces cannot be skipped")
+    expect(state.mayAdvance(step: second, session: nil, verifiedOnMac: false), "optional patio or interior pass can be postponed")
+    let temp = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+    defer { try? FileManager.default.removeItem(at: temp) }
+    let fm = FileManager.default
+    try fm.createDirectory(at: temp.appendingPathComponent("Houses/old/sessions/capture"), withIntermediateDirectories: true)
+    try fm.createDirectory(at: temp.appendingPathComponent("MarkerKit"), withIntermediateDirectories: true)
+    let bytes = Data("original scan bytes".utf8)
+    try bytes.write(to: temp.appendingPathComponent("Houses/old/sessions/capture/depth.bin"))
+    try Data("kit identity".utf8).write(to: temp.appendingPathComponent("MarkerKit/manifest.json"))
+    try JSONEncoder().encode(state).write(to: temp.appendingPathComponent("ScanRouteState.json"))
+    let context = GuidedCaptureContext(routeID: route.id, step: first, sequence: 1, houseID: "old", sessionID: "capture",
+      zoneID: "new-zone", mirrorPreparation: "covered-matte", reflectiveGeometryNeedsReview: true)
+    try context.save(in: temp.appendingPathComponent("Houses/old/sessions/capture"))
+    let restoredContext = GuidedCaptureContext.load(in: temp.appendingPathComponent("Houses/old/sessions/capture"))
+    expect(restoredContext == context && !context.alignmentVerified && !context.automaticReflectionRemoval, "route and mirror metadata round-trip without claiming registration or reflection filtering")
+    let alias = temp.appendingPathExtension("alias")
+    try fm.createSymbolicLink(at: alias, withDestinationURL: temp)
+    defer { try? fm.removeItem(at: alias) }
+    let receipt = try ScanCollectionArchive.archive(documents: alias)
+    expect(receipt.files.allSatisfy { $0.path.hasPrefix("Houses/") || $0.path == "ScanRouteState.json" }, "archive paths survive aliased iPhone sandbox roots")
+    expect(!fm.fileExists(atPath: temp.appendingPathComponent("Houses").path) && !fm.fileExists(atPath: temp.appendingPathComponent("ScanRouteState.json").path), "reset clears active houses and route progress together")
+    expect(fm.fileExists(atPath: temp.appendingPathComponent("MarkerKit/manifest.json").path), "reset preserves the matching printed kit")
+    expect(receipt.files.count == 3 && ScanCollectionArchive.receipts(documents: temp).count == 1, "reset stores a recoverable checksum inventory")
+    let archivedFile = ScanCollectionArchive.root(temp).appendingPathComponent(receipt.id + "/Houses/old/sessions/capture/depth.bin")
+    try Data("corruption".utf8).write(to: archivedFile)
+    do { try ScanCollectionArchive.restore(receipt, documents: temp); expect(false, "corrupt archive restore rejects") }
+    catch { expect(true, "corrupt archive restore rejects") }
+    try bytes.write(to: archivedFile)
+    try ScanCollectionArchive.restore(receipt, documents: temp)
+    expect(try Data(contentsOf: temp.appendingPathComponent("Houses/old/sessions/capture/depth.bin")) == bytes, "archive restore preserves exact original bytes")
+    expect(ScanCollectionArchive.receipts(documents: temp).isEmpty, "restored archives are no longer offered twice")
+    expect(!fm.fileExists(atPath: temp.appendingPathComponent("ScanRouteState.json").path), "restore does not replace the current itinerary")
+  }
+
   func run() async -> Bool {
     var houseID: String?
     do {
       try await coveragePerformance()
       trackingRecovery()
       try roomExperience()
+      try guidedRouteAndArchive()
+      try floorWorkflow()
+      try localizationReferenceFormats()
+      try roomLocalizationSelection()
+      try objectDetailCompatibility()
+      try captureUploadIdentity()
       try captureDiagnostics()
       try await previewNormals()
       try await photoTextures()
@@ -278,6 +606,7 @@ final class SelfTest {
     try house.save()
     expect(zone1.aligned && zone1.id == "area-1", "first zone is placed in the house frame")
     let first = try CaptureController.start(houseID: houseID, zoneID: zone1.id)
+    expect(first.usesRoomPlan, "structure capture still uses RoomPlan")
     expect(first.phase == .betweenRooms && first.plan.worldMap == nil && first.alignment.method == "first", "first session starts fresh, alignment first")
     let s1 = first.plan.sessionID
     for dir in ScanBundle.subfolders {
@@ -399,6 +728,9 @@ final class SelfTest {
       try Data([7, 8, 9]).write(to: source.file(room.mesh!.file))
     }
     for path in ["worldmap.arworldmap", "structure.json", "structure.usdz"] { try Data([0]).write(to: source.file(path)) }
+    try JSONSerialization.data(withJSONObject: ["format": "marker-observations/1", "observations": [
+      ["markerID": "C001", "roomIndex": 0], ["markerID": "C002", "roomIndex": 2], ["markerID": "C003"]
+    ]]).write(to: source.file("marker-observations.json"))
     try source.writeManifest(Manifest(createdAt: Date(), device: "test", systemVersion: "0", house: houseID, session: s1, zone: zone1.id,
                                       worldMap: "worldmap.arworldmap", rooms: roomRecords, structure: "structure.json", mesh: roomRecords[0].mesh,
                                       photos: "photos/photos.json", photoCount: 2, depthFrames: "depth/frames.json", depthFrameCount: 2))
@@ -408,6 +740,9 @@ final class SelfTest {
     expect(exported.photos.map(\.room) == [2] && exported.depthFrames.map(\.room) == [2], "room export filters photo and depth indexes")
     expect(exported.manifest?.photoCount == 1 && exported.manifest?.depthFrameCount == 1 && exported.manifest?.mesh?.file == "mesh/room-2.ply", "room export updates counts and mesh reference")
     expect(exported.manifest?.worldMap == nil && exported.manifest?.structure == nil, "room export clears session-wide references")
+    let exportedMarkers = try JSONSerialization.jsonObject(with: Data(contentsOf: exported.file("marker-observations.json"))) as? [String: Any]
+    let selectedMarkers = exportedMarkers?["observations"] as? [[String: Any]]
+    expect(selectedMarkers?.count == 1 && selectedMarkers?.first?["markerID"] as? String == "C002", "AirDrop room export retains only its own provisional marker observations")
     for path in [photo.file, depth.file, depth.confidence, depth.rgb!, "rooms/room-2.json", "mesh/room-2.ply"] {
       expect(fm.fileExists(atPath: exported.file(path).path), "room export includes \(path)")
     }
@@ -658,8 +993,113 @@ final class SelfTest {
 
   // MARK: fixtures
 
+  private func captureUploadIdentity() throws {
+    let house = "selftest-" + UUID().uuidString
+    let first = PairedCaptureModel.captureID(houseID: house, sessionID: "session", legacyFolder: URL(fileURLWithPath: "/old-container/Documents/session"))
+    let relocated = PairedCaptureModel.captureID(houseID: house, sessionID: "session", legacyFolder: URL(fileURLWithPath: "/new-container/Documents/session"))
+    let other = PairedCaptureModel.captureID(houseID: house, sessionID: "other-session", legacyFolder: URL(fileURLWithPath: "/new-container/Documents/other-session"))
+    expect(first == relocated, "upload resumes with the same identity after sandbox relocation")
+    expect(first != other, "distinct sessions have distinct upload identities")
+    let root = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+      .appendingPathComponent("UploadPathCheck-" + UUID().uuidString, isDirectory: true)
+    defer { try? FileManager.default.removeItem(at: root) }
+    let session = root.appendingPathComponent("2026-10-25 11.08.17", isDirectory: true)
+    try FileManager.default.createDirectory(at: session.appendingPathComponent("depth"), withIntermediateDirectories: true)
+    let bytes = Data([0, 1, 255])
+    try bytes.write(to: session.appendingPathComponent("depth/00000.conf"))
+    let files = try CaptureFiles.collect(session)
+    expect(files.count == 1 && files[0].path == "depth/00000.conf", "device sandbox enumeration produces the correct relative depth path")
+    let reopened = try Data(contentsOf: session.appendingPathComponent(files[0].path))
+    expect(reopened == bytes, "upload reopens the enumerated depth file from the original sandbox URL")
+  }
+
+  private func objectDetailCompatibility() throws {
+    let legacy = PhotoRecord(file: "photos/0000.jpg", room: 0, timestamp: 1, width: 1920, height: 1440,
+      transform: matrix_identity_float4x4.columnMajor, intrinsics: [1400,0,0,0,1400,0,960,720,1],
+      tracking: "normal", manual: true, exposure: 0.01, blurPixels: nil)
+    let old = try JSONDecoder().decode(PhotoRecord.self, from: JSONEncoder().encode(legacy))
+    expect(old.objectID == nil && old.referenceView == nil, "legacy photos decode without object-detail fields")
+    var detail = legacy
+    detail.objectID = "fixture-object"; detail.objectName = "Lamp"; detail.referenceView = "back"; detail.cleanReferenceReported = true
+    let saved = try JSONDecoder().decode(PhotoRecord.self, from: JSONEncoder().encode(detail))
+    expect(saved.objectID == detail.objectID && saved.referenceView == "back" && saved.cleanReferenceReported == true,
+      "object-detail identity, view and clean-photo report round trip")
+  }
+
   /// Same layout CoverageEngine.writePLY produces: a wall (z = -2, facing +z) and a floor
-  private func writeTestPLY(to url: URL, initialNormals: [SIMD3<Float>] = []) throws {
+  private func localizationReferenceFormats() throws {
+    let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: folder) }
+    let original = folder.appendingPathComponent("original.ply")
+    try writeTestPLY(to: original)
+    let baseline = try ZoneReference.reviewed(original)
+    let live = baseline.index.points.enumerated().map { ZoneReference.LivePoint(p: $0.element, n: baseline.index.normals[$0.offset]) }
+    var sessionFromReference = simd_float4x4(simd_quatf(angle: -.pi/4, axis: [0,1,0]))
+    sessionFromReference.columns.3 = [3,0,-4,1]
+    let movedReference = try ZoneReference.reviewed(original, sessionFromReference: sessionFromReference)
+    let movedLive = live.map { ZoneReference.LivePoint(p: simd_make_float3(sessionFromReference*SIMD4($0.p,1)), n: simd_make_float3(sessionFromReference*SIMD4($0.n,0))) }
+    expect(movedReference.check(movedLive).isGood, "reviewed geometry and normals transform into an earlier map before geometric validation")
+    expect(!movedReference.check(live).isGood, "an earlier map cannot validate geometry in the wrong coordinate frame")
+    for (coordinates, normals) in [("double", "double"), ("float64", "float32"), ("float", "float64")] {
+      let url = folder.appendingPathComponent("\(coordinates)-\(normals).ply")
+      try writeTestPLY(to: url, coordinateType: coordinates, normalType: normals)
+      let decoded = try ZoneReference.reviewed(url)
+      expect(decoded.sourceVertices == baseline.sourceVertices && decoded.index.points == baseline.index.points,
+             "\(coordinates)/\(normals) reference preserves exact metre coordinates")
+      expect(decoded.index.normals == baseline.index.normals && decoded.ghost?.triangleCount == baseline.ghost?.triangleCount,
+             "\(coordinates)/\(normals) reference preserves normals and the alignment overlay")
+      expect(decoded.check(live).isGood, "\(coordinates)/\(normals) reference passes matching-corner validation")
+      let shifted = live.map { ZoneReference.LivePoint(p: $0.p + SIMD3(0.25,0,0.25), n: $0.n) }
+      expect(!decoded.check(shifted).isGood, "\(coordinates)/\(normals) reference does not accept a shifted room")
+      let truncated = Data(try Data(contentsOf: url).dropLast(20))
+      try truncated.write(to: url)
+      do { _ = try ZoneReference.reviewed(url); expect(false, "truncated reviewed faces rejected before capture") }
+      catch { expect(true, "truncated reviewed faces rejected before capture") }
+    }
+    let missing = folder.appendingPathComponent("missing.ply")
+    do { _ = try ZoneReference.reviewed(missing); expect(false, "missing reference fails preflight instead of waiting for room recognition") }
+    catch { expect(true, "missing reference fails preflight instead of waiting for room recognition") }
+    let malformed = folder.appendingPathComponent("malformed.ply")
+    try Data("ply\nformat binary_little_endian 1.0\nelement vertex 9223372036854775807\nproperty double x\nproperty double y\nproperty double z\nelement face 0\nend_header\n".utf8).write(to: malformed)
+    do { _ = try ZoneReference.reviewed(malformed); expect(false, "invalid vertex count is rejected without overflowing") }
+    catch { expect(true, "invalid vertex count is rejected without overflowing") }
+  }
+
+  private func roomLocalizationSelection() throws {
+    let hash = String(repeating: "a", count: 64)
+    let room = RoomDetailGuide.Room(id: "entry", label: "Entrance", polygon: [[-2,-2],[2,-2],[2,2],[-2,2]], minY: 0, maxY: 3,
+        targets: [.init(id: "t", label: "Corner", kind: "corner", position: [0,1,-1], normal: [0,0,1])])
+    var second = room; second.id = "living"; second.label = "Living"; second.polygon = [[3,-2],[7,-2],[7,2],[3,2]]; second.targets[0].id = "other"
+    let guide = RoomDetailGuide(format: "room-detail-guide/1", revision: "test", houseID: "home", floorStepID: "ground", modelFromReference: matrix_identity_float4x4.columnMajor, referenceMap: "map", referenceMapSHA256: hash, referenceMesh: "mesh", referenceMeshSHA256: hash, rooms: [room,second])
+    let early = RoomLocalizationCatalog.Reference(id: "early", label: "Entry pass", roomIDs: ["entry","living"], mapFile: "early.map", mapSHA256: hash, referenceFromSession: matrix_identity_float4x4.columnMajor, provenance: "registered")
+    var late = early; late.id = "late"; late.mapFile = "late.map"; late.roomIDs = ["living"]
+    var catalog = RoomLocalizationCatalog(houseID: "home", floorStepID: "ground", guideSHA256: hash, references: [late,early], photos: [], preferredReferenceByRoom: ["entry":"early","living":"late"])
+    try catalog.validate(guide: guide, expectedGuideHash: hash)
+    expect(catalog.references(for: "entry").map(\.id) == ["early"], "Entrance never selects a later map with no declared entrance coverage")
+    expect(catalog.references(for: "living").map(\.id) == ["late","early"], "each room prefers its own reviewed map while preserving eligible alternatives")
+    do { try catalog.validate(guide: guide, expectedGuideHash: String(repeating: "b",count: 64)); expect(false,"stale recovery catalog rejected") } catch { expect(true,"stale recovery catalog rejected") }
+    catalog.photos = [.init(roomID: "entry", file: "entry.jpg", sha256: hash, positionInModel: [4,1,0], forwardInModel: [0,0,-1])]
+    do { try catalog.validate(guide: guide, expectedGuideHash: hash); expect(false,"a photo located in another room cannot be labelled as Entrance") } catch { expect(true,"a photo located in another room cannot be labelled as Entrance") }
+    catalog.photos[0].positionInModel = [0,1,0]
+    try catalog.validate(guide: guide, expectedGuideHash: hash)
+    expect(true,"correctly positioned room photo accepted")
+    catalog.references[0].referenceFromSession[0] = 2
+    do { try catalog.validate(guide: guide, expectedGuideHash: hash); expect(false,"scaled recovery transforms rejected") } catch { expect(true,"scaled recovery transforms rejected") }
+    catalog.references[0] = late; catalog.references[0].mapFile = "../another-home.map"
+    do { try catalog.validate(guide: guide, expectedGuideHash: hash); expect(false,"recovery assets cannot escape their reviewed folder") } catch { expect(true,"recovery assets cannot escape their reviewed folder") }
+    let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: folder) }
+    let image = Data("not an image".utf8); try image.write(to: folder.appendingPathComponent("entry.jpg"))
+    catalog.photos[0].sha256 = RoomDetailGuide.hash(image)
+    do { _ = try catalog.landmarks(for: "entry", folder: folder); expect(false,"matching checksum does not accept an unreadable reference photo") } catch { expect(true,"matching checksum does not accept an unreadable reference photo") }
+    expect(try catalog.landmarks(for: "living", folder: folder).isEmpty,"missing room photos never fall back to another room's images")
+    catalog.photos[0].sha256 = hash
+    do { _ = try catalog.landmarks(for: "entry", folder: folder); expect(false,"changed room photograph fails checksum") } catch { expect(true,"changed room photograph fails checksum") }
+  }
+
+  private func writeTestPLY(to url: URL, initialNormals: [SIMD3<Float>] = [], coordinateType: String = "float", normalType: String = "float") throws {
     var verts: [(SIMD3<Float>, SIMD3<Float>)] = []
     var faces: [(UInt32, UInt32, UInt32)] = []
     func grid(_ origin: SIMD3<Float>, _ u: SIMD3<Float>, _ v: SIMD3<Float>, _ n: SIMD3<Float>, _ nu: Int, _ nv: Int) {
@@ -679,8 +1119,8 @@ final class SelfTest {
     grid(SIMD3(-1.5, 0, -2), SIMD3(0, 0, 0.03), SIMD3(0, 0.03, 0), SIMD3(1, 0, 0), 60, 80)
     var header = "ply\nformat binary_little_endian 1.0\n"
     header += "comment selftest\n"
-    header += "element vertex \(verts.count)\nproperty float x\nproperty float y\nproperty float z\n"
-    header += "property float nx\nproperty float ny\nproperty float nz\nproperty float coverage\n"
+    header += "element vertex \(verts.count)\nproperty \(coordinateType) x\nproperty \(coordinateType) y\nproperty \(coordinateType) z\n"
+    header += "property \(normalType) nx\nproperty \(normalType) ny\nproperty \(normalType) nz\nproperty float coverage\n"
     header += "property uchar red\nproperty uchar green\nproperty uchar blue\nproperty uchar inroom\n"
     header += "element face \(faces.count)\nproperty list uchar uint vertex_indices\nproperty uchar class\nend_header\n"
     var data = Data(header.utf8)
@@ -688,7 +1128,11 @@ final class SelfTest {
     for (i, vertex) in verts.enumerated() {
       let (p, normal) = vertex
       let n = i < initialNormals.count ? initialNormals[i] : normal
-      put(p.x); put(p.y); put(p.z); put(n.x); put(n.y); put(n.z); put(Float(1))
+      if ["double", "float64"].contains(coordinateType) { put(Double(p.x)); put(Double(p.y)); put(Double(p.z)) }
+      else { put(p.x); put(p.y); put(p.z) }
+      if ["double", "float64"].contains(normalType) { put(Double(n.x)); put(Double(n.y)); put(Double(n.z)) }
+      else { put(n.x); put(n.y); put(n.z) }
+      put(Float(1))
       put(UInt8(52)); put(UInt8(199)); put(UInt8(89)); put(UInt8(1))
     }
     for f in faces { put(UInt8(3)); put(f.0); put(f.1); put(f.2); put(UInt8(1)) }

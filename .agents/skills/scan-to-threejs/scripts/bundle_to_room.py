@@ -182,6 +182,7 @@ def main():
             'file': p['file'], 'position': [round(v, 4) for v in pos], 'forward': [round(v, 5) for v in fwd],
             'up': [round(v, 5) for v in up], 'fovY': round(fovY, 3), 'aspect': round(p['height'] / p['width'], 5),
             'blurPixels': p.get('blurPixels'),
+            **{key: p[key] for key in ('objectID', 'objectName', 'referenceView', 'cleanReferenceReported') if key in p},
         })
 
     result = {

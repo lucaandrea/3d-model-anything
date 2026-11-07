@@ -1,0 +1,4 @@
+# Local scan import, image comparison, and optional depth reconstruction.
+Pillow==13.0.0
+numpy==2.5.4
+open3d==0.20.0

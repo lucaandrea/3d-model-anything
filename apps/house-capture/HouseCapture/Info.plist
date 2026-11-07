@@ -18,6 +18,17 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>ooo.luca.modelanything.capture</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>housecapture</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>HouseCapturePrivacyURL</key>
@@ -28,8 +39,14 @@
 	<false/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_housecapture._tcp</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>3D Model Anything uses the camera and LiDAR scanner to measure your rooms and take reference photos.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>3D Model Anything sends your scans and live coverage to your paired Mac and receives your printed reference-card kit.</string>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchScreen</key>

@@ -19,7 +19,11 @@ enum WorldMapFile {
 
   /// Call off the main thread (maps are 5–60 MB)
   static func load(_ url: URL) throws -> ARWorldMap {
-    let data = try Data(contentsOf: url)
+    let bytes = (try FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int) ?? 0
+    guard FloorCapturePolicy.acceptsResumeMap(bytes: bytes) else {
+      throw CocoaError(.fileReadTooLarge, userInfo: [NSFilePathErrorKey: url.path])
+    }
+    let data = try Data(contentsOf: url, options: .mappedIfSafe)
     guard let map = try NSKeyedUnarchiver.unarchivedObject(ofClass: ARWorldMap.self, from: data) else {
       throw CocoaError(.fileReadCorruptFile, userInfo: [NSFilePathErrorKey: url.path])
     }
@@ -68,6 +72,19 @@ final class ZoneReference: @unchecked Sendable { // immutable after load
   let errors: [String]
 
   var isEmpty: Bool { index.points.isEmpty }
+
+  /// Reviewed guides require usable geometry, not just a file with a matching checksum.
+  static func reviewed(_ url: URL, sessionFromReference: simd_float4x4 = matrix_identity_float4x4) throws -> ZoneReference {
+    guard RoomLocalizationCatalog.validTransform(sessionFromReference.columnMajor) else {
+      throw GuidedRouteError("The recovery map has no valid transform into the reviewed floor.")
+    }
+    let reference = build([(url: url, toZone: sessionFromReference, name: "Reviewed floor reference")])
+    guard reference.errors.isEmpty, !reference.isEmpty, reference.ghost != nil else {
+      let reason = reference.errors.first ?? "The mesh has no usable surfaces."
+      throw GuidedRouteError("The saved floor reference cannot be used for room recognition. \(reason) Your scans are preserved; repair the reference before starting guided details.")
+    }
+    return reference
+  }
 
   init(ghost: Ghost?, index: SurfaceIndex, sourceVertices: Int, files: [String], errors: [String]) {
     self.ghost = ghost
@@ -129,7 +146,10 @@ final class ZoneReference: @unchecked Sendable { // immutable after load
       var world = [SIMD3<Float>](repeating: .zero, count: file.vertexCount)
       file.forEachVertex { i, p, n in
         let w = simd_make_float3(m * SIMD4(p, 1))
-        let wn = n.map { simd_normalize(rot * $0) } ?? .zero
+        guard w.x.isFinite, w.y.isFinite, w.z.isFinite, abs(w.x)<10000, abs(w.y)<10000, abs(w.z)<10000 else { return }
+        let transformedNormal = rot * (n ?? .zero)
+        let length = simd_length(transformedNormal)
+        let wn = length.isFinite && length > 0.00001 ? transformedNormal / length : .zero
         world[i] = w
         clusterOf[i] = ghostBuilder.addVertex(w, wn)
         indexBuilder.add(w, wn)
@@ -444,7 +464,7 @@ private struct GhostBuilder {
 
 // MARK: - PLY reader (the app's own mesh files; see CoverageEngine.writePLY)
 
-/// Binary little-endian PLY with float x y z (+ optional nx ny nz) per vertex and a face list.
+/// Binary little-endian PLY with float/double coordinates and normals plus a face list.
 /// Memory-mapped; the property layout is read from the header rather than assumed.
 private struct PLYFile {
   let data: Data
@@ -452,7 +472,15 @@ private struct PLYFile {
   let faceCount: Int
   private let bodyStart: Int
   private let vertexStride: Int
-  private let offsets: (x: Int, y: Int, z: Int, nx: Int?, ny: Int?, nz: Int?)
+  private struct Field {
+    let offset: Int
+    let bytes: Int
+    func read(_ raw: UnsafeRawBufferPointer, base: Int) -> Float {
+      if bytes == 8 { return Float(raw.loadUnaligned(fromByteOffset: base + offset, as: Double.self)) }
+      return raw.loadUnaligned(fromByteOffset: base + offset, as: Float.self)
+    }
+  }
+  private let offsets: (x: Field, y: Field, z: Field, nx: Field?, ny: Field?, nz: Field?)
   /// face record: bytes of properties before the list, list count size, index size, bytes after
   private let faceLayout: (before: Int, countSize: Int, indexSize: Int, after: Int)
 
@@ -504,7 +532,9 @@ private struct PLYFile {
           vProps.append((parts[1], parts[2]))
         } else if element == "face" {
           if parts.count >= 5, parts[1] == "list" {
-            guard let c = Self.size(of: parts[2]), let i = Self.size(of: parts[3]), i == 4 || i == 2 else { throw Failure(message: "unsupported face list") }
+            guard !sawList, ["uchar", "uint8", "ushort", "uint16", "uint", "uint32"].contains(parts[2]),
+                  ["int", "uint", "int32", "uint32", "short", "ushort", "int16", "uint16"].contains(parts[3]),
+                  let c = Self.size(of: parts[2]), let i = Self.size(of: parts[3]) else { throw Failure(message: "unsupported face list") }
             countSize = c; indexSize = i; sawList = true
           } else if parts.count >= 3, let s = Self.size(of: parts[1]) {
             if sawList { fAfter += s } else { fBefore += s }
@@ -513,12 +543,12 @@ private struct PLYFile {
       }
     }
     var offset = 0
-    var named: [String: Int] = [:]
+    var named: [String: Field] = [:]
     for (type, name) in vProps {
       guard let s = Self.size(of: type) else { throw Failure(message: "unsupported vertex property \(type)") }
       if ["x", "y", "z", "nx", "ny", "nz"].contains(name) {
-        guard type == "float" || type == "float32" else { throw Failure(message: "\(name) isn't float") }
-        named[name] = offset
+        guard ["float", "float32", "double", "float64"].contains(type), named[name] == nil else { throw Failure(message: "unsupported or duplicate \(name) coordinate") }
+        named[name] = Field(offset: offset, bytes: s)
       }
       offset += s
     }
@@ -529,7 +559,24 @@ private struct PLYFile {
     faceLayout = (fBefore, countSize, indexSize, fAfter)
     vertexCount = vCount
     faceCount = fCount
-    guard bodyStart + vertexCount * vertexStride <= data.count else { throw Failure(message: "truncated vertices") }
+    guard vertexCount > 0, faceCount >= 0, vertexStride > 0,
+          vertexCount <= (data.count - bodyStart) / vertexStride else { throw Failure(message: "empty or truncated vertices") }
+    // A partially decoded mesh must not silently become a reviewed localization reference.
+    try data.withUnsafeBytes { (raw: UnsafeRawBufferPointer) in
+      var at = bodyStart + vertexCount * vertexStride
+      for _ in 0..<faceCount {
+        guard fBefore + countSize <= raw.count - at else { throw Failure(message: "truncated face list") }
+        at += fBefore
+        let count: Int = switch countSize {
+        case 1: Int(raw.load(fromByteOffset: at, as: UInt8.self))
+        case 2: Int(raw.loadUnaligned(fromByteOffset: at, as: UInt16.self))
+        default: Int(raw.loadUnaligned(fromByteOffset: at, as: UInt32.self))
+        }
+        at += countSize
+        guard fAfter <= raw.count - at, count <= (raw.count - at - fAfter) / indexSize else { throw Failure(message: "truncated face indices") }
+        at += count * indexSize + fAfter
+      }
+    }
   }
 
   func forEachVertex(_ body: (Int, SIMD3<Float>, SIMD3<Float>?) -> Void) {
@@ -537,15 +584,12 @@ private struct PLYFile {
       let hasNormals = offsets.nx != nil && offsets.ny != nil && offsets.nz != nil
       for i in 0..<vertexCount {
         let base = bodyStart + i * vertexStride
-        let p = SIMD3(raw.loadUnaligned(fromByteOffset: base + offsets.x, as: Float.self),
-                      raw.loadUnaligned(fromByteOffset: base + offsets.y, as: Float.self),
-                      raw.loadUnaligned(fromByteOffset: base + offsets.z, as: Float.self))
-        guard p.x.isFinite, p.y.isFinite, p.z.isFinite else { continue }
+        let p = SIMD3(offsets.x.read(raw, base: base), offsets.y.read(raw, base: base), offsets.z.read(raw, base: base))
+        guard p.x.isFinite, p.y.isFinite, p.z.isFinite, abs(p.x) < 10000, abs(p.y) < 10000, abs(p.z) < 10000 else { continue }
         var n: SIMD3<Float>?
         if hasNormals {
-          n = SIMD3(raw.loadUnaligned(fromByteOffset: base + offsets.nx!, as: Float.self),
-                    raw.loadUnaligned(fromByteOffset: base + offsets.ny!, as: Float.self),
-                    raw.loadUnaligned(fromByteOffset: base + offsets.nz!, as: Float.self))
+          let value = SIMD3(offsets.nx!.read(raw, base: base), offsets.ny!.read(raw, base: base), offsets.nz!.read(raw, base: base))
+          if value.x.isFinite, value.y.isFinite, value.z.isFinite { n = value }
         }
         body(i, p, n)
       }

@@ -5,6 +5,8 @@ export type V3 = [number, number, number];
 
 /** A rebuilt room, ready to drop into the viewer (or the capture page) */
 export interface BuiltRoom {
+  /** Distinguish a measured schematic from a detailed authored reconstruction. */
+  modelLabel?: string;
   layout?: RoomLayout;
   group: THREE.Group;
   lights: THREE.Group;

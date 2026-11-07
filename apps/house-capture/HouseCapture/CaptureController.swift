@@ -71,18 +71,43 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
 
   @Published private(set) var phase: Phase
   @Published var roomName = ""
+  /// Optional private itinerary, written to route-step.json before capture starts.
+  var guidedContext: GuidedCaptureContext?
+  var isFloorStructure: Bool { guidedContext?.step.isStructure == true }
+  var floorCheckpointInterval = FloorCapturePolicy.checkpointSeconds
+  private var checkpointContinuesFloor = false
+  private var finishFloorAfterSection = false
+  @Published private(set) var floorSavingCheckpoint = false
+  var floorTitle: String { guidedContext?.step.title ?? roomName }
+  func finishFloor() {
+    finishFloorAfterSection = true
+    checkpointContinuesFloor = false
+    finishRoom()
+  }
   @Published private(set) var rooms: [RoomRecord] = []
   @Published private(set) var photoCount = 0
   private let autoPhotos = true
   @Published var highResolutionPhotos = false
+  @Published var detailObjectName = ""
+  @Published var detailView = "front"
+  @Published var detailCleanPhoto = false
+  private var detailObjectIDs: [String: String] = [:]
+  var detailViewsTaken: [String] {
+    let name = detailObjectName.trimmingCharacters(in: .whitespacesAndNewlines)
+    return Array(Set(photos.filter { $0.room == roomIndex && $0.objectName == name }.compactMap(\.referenceView))).sorted()
+  }
+  var captureDepthCount: Int { depthRecorder.records.count }
+  var captureWallCount: Int { liveRoom?.walls.count ?? rooms.last?.walls ?? 0 }
   @Published private(set) var trackingIssue: TrackingRecovery.Issue? = .starting
   @Published private(set) var sessionNeedsRestart = false
+  @Published private(set) var cameraStartupDelayed = false
+  private var hasTrackedCurrentRoom = false
   @Published private(set) var recordingSaveFailed = false
   private var pendingRoomIDs: [Int: String] = [:]
   private var recovery = TrackingRecovery()
   private var sessionInterrupted = false
   private var lastHighResRequest: TimeInterval = -.infinity
-  var captureReady: Bool { recovery.canCapture && !sessionNeedsRestart && !sessionInterrupted }
+  var captureReady: Bool { recovery.canCapture && !sessionNeedsRestart && !sessionInterrupted && !alignmentContinuity.awaitingConfirmation }
   var canTakePhoto: Bool { phase == .scanning && !paused && captureReady && !highResInFlight && photosInFlight == 0 }
   @Published private(set) var lastWarning: String?
   /// good news (relocalized, map saved) shown briefly
@@ -112,14 +137,66 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
   /// what finishing is doing right now
   @Published private(set) var finishingStep = ""
 
+  var configureReferences: ((ARWorldTrackingConfiguration) -> Void)?
+  var detailProgress: RoomDetailProgress?
+  private var preparedDetailReference: PreparedDetailReference?
+  private var detailReferenceRequest: PreparedDetailReference.Request?
+  private var detailReferenceOptions: [RoomLocalizationCatalog.Reference] = []
+  private var activeDetailReferenceID: String?
+  @Published private(set) var detailReferenceLabel = ""
+  @Published private(set) var switchingDetailReference = false
+  var nextDetailReference: RoomLocalizationCatalog.Reference? {
+    guard detailReferenceOptions.count > 1 else { return nil }
+    let index = detailReferenceOptions.firstIndex { $0.id == activeDetailReferenceID } ?? 0
+    return detailReferenceOptions[(index+1)%detailReferenceOptions.count]
+  }
+  @Published private(set) var detailActiveSeconds: TimeInterval = 0
+  @Published private(set) var detailCheckpointReason: String?
+  private var lastDetailTick: TimeInterval?
+  private var detailCheckpointAnnounced = false
+  var detailPassPhotoCount: Int { roomPhotoCount }
+  var isGuidedDetail: Bool { guidedContext?.step.isDetail == true }
+  func updateDetailGuidance() {
+    let now = CACurrentMediaTime()
+    defer { lastDetailTick = now }
+    guard isGuidedDetail || detailProgress != nil else { return }
+    let progress = detailProgress
+    let frame = arSession.currentFrame
+    let orientation = scanView.view.window?.windowScene?.interfaceOrientation ?? .portrait
+    let tracked: Bool
+    if case .normal? = frame?.camera.trackingState { tracked = true } else { tracked = false }
+    progress?.update(camera: frame?.camera.transform,
+      viewFromSession: frame?.camera.viewMatrix(for: orientation),
+      liveDepth: frame.flatMap { DepthRecorder.grid(for: $0) },
+      localized: tracked && (phase == .betweenRooms || (phase == .scanning && captureReady)) && !sessionNeedsRestart && alignment.method == "relocalized")
+    guard phase == .scanning, !paused else { return }
+    if captureReady, progress?.locationReady ?? true, let previous = lastDetailTick {
+      detailActiveSeconds += min(2, max(0, now - previous))
+    }
+    detailCheckpointReason = DetailCaptureCheckpoint.reason(activeSeconds: detailActiveSeconds,
+      photos: roomPhotoCount, remaining: progress?.needsViews ?? -1, constrained: captureBudget.constrained,
+      stalledSeconds: progress.map { Date().timeIntervalSince($0.lastImprovementAt) } ?? 0)
+    if detailCheckpointReason != nil, !detailCheckpointAnnounced {
+      detailCheckpointAnnounced = true
+      UINotificationFeedbackGenerator().notificationOccurred(.warning)
+    }
+  }
+  var checkingPostStartAlignment: Bool { alignmentContinuity.awaitingConfirmation }
+  private var alignmentContinuity = AlignmentContinuity()
   let arSession = ARSession()
   private var roomSessionCreated = false
-  private lazy var roomSession: RoomCaptureSession = {
+  private var roomSessionStorage: RoomCaptureSession?
+  private var roomSession: RoomCaptureSession {
+    if let roomSessionStorage { return roomSessionStorage }
     roomSessionCreated = true
-    let s = RoomCaptureSession(arSession: arSession)
-    s.delegate = self
-    return s
-  }()
+    let session = RoomCaptureSession(arSession: arSession)
+    session.delegate = self
+    roomSessionStorage = session
+    return session
+  }
+  // Reviewed detail passes keep the already localized AR session. Starting RoomPlan
+  // here reconfigures that session and can terminate with its structural scene limit.
+  var usesRoomPlan: Bool { !isGuidedDetail && detailProgress == nil }
   let engine = CoverageEngine()
   private(set) lazy var scanView: ScanView = {
     let scan = ScanView(session: arSession, engine: engine)
@@ -140,6 +217,17 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
       self.scanView.feed.isOn = false
       self.diagnostics.log(event, since: self.startedAt)
       self.sampleDiagnostics(force: true)
+      if self.sessionInterrupted, self.phase == .scanning {
+        // RoomPlan may silently re-express its output after an interruption.
+        // Freeze the accepted mesh before any post-interruption frames arrive.
+        self.sessionNeedsRestart = true
+        self.checkpointContinuesFloor = false
+        self.alignment = .init(method: "unaligned", note: "Camera session interrupted; saved section requires Mac review")
+        self.diagnostics.alignmentInvalidated = true
+        self.saveAlignment()
+        self.lastWarning = "The camera was interrupted. This section is being saved. Keep it for Mac review; do not rescan the entire floor."
+        self.finishRoom()
+      }
     }
     return scan
   }()
@@ -195,6 +283,9 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
   private var worldMapSaved = false
   private var worldMapStatus: String?
   private var warnedBigMap = false
+  private var savedMapBytes = 0
+  private var floorMemoryWarning = false
+  @Published private(set) var floorPausedForResources = false
 
   // relocalization
   private var relocMap: ARWorldMap?
@@ -209,21 +300,22 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
   private var goodMedians: [Float] = []
   private var mismatchSince: CFTimeInterval?
   private var checkInFlight = false
+  private var checkGeneration = 0
   private var lastCheckAt: CFTimeInterval = 0
   private let checkQueue = DispatchQueue(label: "alignment-check", qos: .userInitiated)
   private var lastTrackingLog = ""
   private var lastMappingLog: ARFrame.WorldMappingStatus?
-  private var monitorBad = 0
   private var warnedDrift = false
 
   static var isSupported: Bool { RoomCaptureSession.isSupported }
   static let relocalizationTimeout: CFTimeInterval = 90
 
-  init(house: HouseProject, plan: CapturePlan, bundle: ScanBundle, alignment: HouseProject.Alignment) {
+  init(house: HouseProject, plan: CapturePlan, bundle: ScanBundle, alignment: HouseProject.Alignment, preparedDetailReference: PreparedDetailReference? = nil) {
     self.house = house
     self.plan = plan
     self.bundle = bundle
     self.alignment = alignment
+    self.preparedDetailReference = preparedDetailReference
     phase = plan.worldMap == nil ? .betweenRooms : .relocalizing
     super.init()
     roomName = "" // asked for before each room
@@ -239,7 +331,10 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
 
   /// Set up a new session in a house: its folder, and its entry in house.json (so rooms are
   /// recorded as they finish). `newZone` makes a new area first.
-  static func start(houseID: String, zoneID: String?, newZone: String? = nil) throws -> CaptureController {
+  static func start(houseID: String, zoneID: String?, newZone: String? = nil, preserveFloorZone: Bool = false, referenceMap: URL? = nil, preparedDetailReference: PreparedDetailReference? = nil) throws -> CaptureController {
+    if let preparedDetailReference, preparedDetailReference.guide.houseID != houseID {
+      throw GuidedRouteError("The prepared room reference belongs to another house.")
+    }
     var house = try HouseProject.load(id: houseID)
     var zone: HouseProject.Zone?
     if let newZone {
@@ -248,8 +343,15 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
       zone = house.zone(zoneID)
       if let candidate = zone, let map = house.existingWorldMap(zone: candidate) {
         let bytes = (try? FileManager.default.attributesOfItem(atPath: map.path)[.size] as? Int) ?? 0
-        if bytes >= 35_000_000 || house.roomsInZone(candidate.id).count >= 4 { zone = house.addZone(named: "") }
-      } else if let candidate = zone, !house.sessionsInZone(candidate.id).isEmpty { zone = house.addZone(named: "") }
+        if preserveFloorZone {
+          guard FloorCapturePolicy.acceptsResumeMap(bytes: bytes) else {
+            throw GuidedRouteError("This floor's saved map exceeds the supported reload size or is empty. Its checkpoints are preserved. Keep this capture for recovery; do not start over or delete it.")
+          }
+        } else if bytes >= 35_000_000 || house.roomsInZone(candidate.id).count >= 4 { zone = house.addZone(named: "") }
+      } else if let candidate = zone, !house.sessionsInZone(candidate.id).isEmpty {
+        if preserveFloorZone { throw GuidedRouteError("This floor has no recoverable tracking map. Start a fresh floor attempt; the earlier files will remain saved.") }
+        zone = house.addZone(named: "")
+      }
     } else {
       zone = house.addZone(named: "")
     }
@@ -262,7 +364,7 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
       n += 1
     }
     let placed = house.placedSessionsInZone(zone.id)
-    let map = house.existingWorldMap(zone: zone)
+    let map = preparedDetailReference?.mapURL ?? referenceMap ?? house.existingWorldMap(zone: zone)
     var plan = CapturePlan(houseID: houseID, zoneID: zone.id, sessionID: id, worldMap: nil, freshMethod: "first")
     let alignment: HouseProject.Alignment
     if let map {
@@ -284,12 +386,12 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
       try? bundle.delete()
       throw error
     }
-    return CaptureController(house: house, plan: plan, bundle: bundle, alignment: alignment)
+    return CaptureController(house: house, plan: plan, bundle: bundle, alignment: alignment, preparedDetailReference: preparedDetailReference)
   }
 
   private var roomIndex: Int { rooms.count } // the room being scanned
 
-  var zoneName: String { house.roomsInZone(plan.zoneID).map(\.name).joined(separator: ", ").isEmpty ? "your earlier scan" : house.roomsInZone(plan.zoneID).map(\.name).joined(separator: ", ") }
+  var zoneName: String { if let context = guidedContext { return context.step.title }; return house.roomsInZone(plan.zoneID).map(\.name).joined(separator: ", ").isEmpty ? "your earlier scan" : house.roomsInZone(plan.zoneID).map(\.name).joined(separator: ", ") }
   var isContinue: Bool { plan.worldMap != nil }
   var hasGhost: Bool { reference?.ghost != nil }
 
@@ -320,20 +422,74 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     diagnostics.relocalization?.worldMapBytes = (try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int) ?? nil
     UIApplication.shared.isIdleTimerDisabled = true
     startTicking()
+    if let prepared = preparedDetailReference {
+      preparedDetailReference = nil // do not retain a second map after handing it to ARKit
+      usePreparedDetailReference(prepared)
+      return
+    }
     let snapshot = house, zone = plan.zoneID, session = plan.sessionID
+    let reviewedMesh = detailProgress.map { $0.folder.appendingPathComponent($0.guide.referenceMesh) }
     Task.detached(priority: .userInitiated) { [weak self] in
       let result = Result { try WorldMapFile.load(url) }
       await self?.worldMapLoaded(result)
     }
     Task.detached(priority: .utility) { [weak self] in
-      let ref = ZoneReference.load(house: snapshot, zone: zone, excludingSession: session)
+      let ref = reviewedMesh.map { ZoneReference.build([(url: $0, toZone: matrix_identity_float4x4, name: "Reviewed floor reference")]) } ?? ZoneReference.load(house: snapshot, zone: zone, excludingSession: session)
       let marks = PriorPhotos.landmarks(house: snapshot, zone: zone)
       await self?.referenceReady(ref, landmarks: marks)
     }
   }
 
+  private func usePreparedDetailReference(_ prepared: PreparedDetailReference) {
+    detailReferenceRequest = prepared.request
+    detailReferenceOptions = prepared.alternatives
+    activeDetailReferenceID = prepared.sessionReference.referenceID
+    detailReferenceLabel = prepared.referenceLabel
+    detailProgress?.useReference(prepared.sessionReference, bundle: bundle.url)
+    diagnostics.log("detail reference: \(prepared.sessionReference.referenceID); map \(prepared.sessionReference.mapSHA256)", since: startedAt)
+    referenceReady(prepared.mesh, landmarks: prepared.landmarks)
+    worldMapLoaded(.success(prepared.map))
+  }
+
+  /// Switch only before recording starts. Never reinterpret an existing photo's frame.
+  func tryNextDetailReference() {
+    guard let next = nextDetailReference else { return }
+    reloadDetailReference(id: next.id)
+  }
+
+  /// A visually wrong fit must never authorize photographic progress.
+  func rejectDetailAlignment() {
+    guard phase == .betweenRooms, rooms.isEmpty, photoCount == 0, detailProgress != nil else { return }
+    alignment = .init(method: "unaligned", note: "User rejected the reference overlay before recording")
+    saveAlignment()
+    detailProgress?.update(camera: nil, localized: false)
+    phase = .relocalizing
+    scanView.feed.isOn = false
+    scanView.setGhostOpacity(0)
+    notice = nil
+    diagnostics.log("user rejected detail alignment", since: startedAt)
+    reloadDetailReference(id: activeDetailReferenceID)
+  }
+
+  private func reloadDetailReference(id: String?) {
+    guard phase == .relocalizing, !switchingDetailReference, let request = detailReferenceRequest else { return }
+    switchingDetailReference = true
+    checkGeneration += 1; checkInFlight = false
+    arSession.pause(); sessionRunning = false
+    reloc.stage = .loadingMap; referenceLoaded = false
+    Task {
+      do {
+        let prepared = try await Task.detached(priority: .userInitiated) { try request.load(referenceID: id) }.value
+        guard !closed, phase == .relocalizing else { switchingDetailReference = false; return }
+        usePreparedDetailReference(prepared)
+      } catch { reloc.stage = .failed(error.localizedDescription) }
+      switchingDetailReference = false
+    }
+  }
+
   private func worldMapLoaded(_ result: Result<ARWorldMap, Error>) {
     guard phase == .relocalizing, !closed else { return }
+    if case .failed = reloc.stage { return } // a mesh failure must not be reset by a later map load
     switch result {
     case .success(let map):
       relocMap = map
@@ -354,6 +510,11 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     guard phase == .relocalizing || alignment.method == "relocalized" else { return } // went unaligned meanwhile
     reference = ref
     referenceLoaded = true
+    if detailProgress != nil, ref.isEmpty || !ref.errors.isEmpty {
+      reloc.stage = .failed("The reviewed floor mesh could not be loaded. Return to room progress and repair the reference; do not keep aiming at the room.")
+      arSession.pause(); sessionRunning = false
+      return
+    }
     scanView.setGhost(ref.ghost)
     applyGhostOpacity()
     reloc.reference = ref.isEmpty
@@ -374,7 +535,9 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
   private func runRelocalization(_ map: ARWorldMap) {
     // the only reset in a Continue session: nothing of this session's own exists yet
     scanView.feed.isOn = false
-    arSession.run(Self.relocalizationConfiguration(map: map), options: [.resetTracking, .removeExistingAnchors])
+    let configuration = Self.relocalizationConfiguration(map: map)
+    configureReferences?(configuration)
+    arSession.run(configuration, options: [.resetTracking, .removeExistingAnchors])
     sessionRunning = true
     let now = CACurrentMediaTime()
     relocRunAt = now
@@ -442,6 +605,10 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
       return
     }
     if reference.isEmpty {
+      if detailProgress != nil {
+        reloc.stage = .failed("Room recognition requires the reviewed floor mesh. Your saved scans are unchanged.")
+        return
+      }
       // nothing to measure against: trust ARKit once tracking has been steady a moment
       reloc.stage = .checking
       reloc.progress = Float(min(1, (now - normalSince) / 3))
@@ -458,6 +625,7 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
   private func runCheck(_ frame: ARFrame, reference: ZoneReference) {
     let anchors = frame.anchors.compactMap { $0 as? ARMeshAnchor }
     let camera = frame.camera.transform
+    let generation = checkGeneration
     checkInFlight = true
     lastCheckAt = CACurrentMediaTime()
     checkQueue.async { [weak self] in
@@ -466,6 +634,7 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
       Task { @MainActor in
         guard let self else { return }
         self.checkInFlight = false
+        guard generation == self.checkGeneration else { return }
         self.handle(check)
       }
     }
@@ -528,8 +697,7 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     if captureReady { scanView.refeedEngine(from: arSession) }
     loadPriorPhotos()
     UINotificationFeedbackGenerator().notificationOccurred(.success)
-    show(notice: residual.map { "Lined up with your earlier scan (±\(String(format: "%.1f", $0 * 100)) cm). Pick up where you left off." }
-      ?? "Relocalized in \(zoneName). Pick up where you left off.")
+    show(notice: "Saved geometry matched. Check that the overlay lines up with fixed walls and corners.")
   }
 
   /// Give up on the saved map: this session gets its own frame (the Mac lines it up later)
@@ -579,7 +747,10 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     let alpha: CGFloat
     switch phase {
     case .relocalizing: alpha = seenNormal ? 0.4 : 0
-    case .betweenRooms, .scanning, .finishingRoom: alpha = alignment.method == "relocalized" && ghostVisible ? 0.14 : 0
+    case .betweenRooms: alpha = alignment.method == "relocalized" && ghostVisible ? 0.22 : 0
+    case .scanning, .finishingRoom:
+      // Old reference geometry is not new photographic coverage.
+      alpha = detailProgress == nil && alignment.method == "relocalized" && ghostVisible ? 0.14 : 0
     default: alpha = 0
     }
     scanView.setGhostOpacity(alpha)
@@ -593,15 +764,29 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     list.append(.init(t: Date().timeIntervalSince(startedAt).rounded1, known: check.known, matched: check.matched, median: check.median))
     if list.count > 300 { list.removeFirst(list.count - 300) }
     diagnostics.alignmentChecks = list
-    if check.isMismatch { monitorBad += 1 } else if check.isGood { monitorBad = 0 }
-    if monitorBad >= 3, !warnedDrift {
+    let awaiting = alignmentContinuity.awaitingConfirmation
+    alignmentContinuity.observe(known: check.known, matches: check.isGood, mismatch: check.isMismatch)
+    if awaiting && !alignmentContinuity.awaitingConfirmation && !alignmentContinuity.invalidated {
+      scanView.refeedEngine(from: arSession)
+      diagnostics.log("post-start alignment verified", since: startedAt)
+      show(notice: "Position confirmed after camera setup. Continue scanning.")
+    }
+    if alignmentContinuity.invalidated, !warnedDrift {
       warnedDrift = true
       diagnostics.log("alignment drift: known \(check.known) matched \(check.matched)", since: startedAt)
-      lastWarning = "The earlier scan doesn't line up any more (tracking may have reset). Finish this session and use Continue again so new rooms land in the right place."
+      alignment = .init(method: "unaligned", note: "Live geometry stopped matching after relocalization; Mac registration required")
+      saveAlignment()
+      candidate = nil
+      scanView.feed.isOn = false
+      sessionNeedsRestart = true
+      lastWarning = "Position changed after setup. Recording has stopped to protect alignment. Save this part for Mac review before continuing."
+      diagnostics.alignmentInvalidated = true
+      if phase == .scanning { finishRoom() }
     }
   }
 
   private func loadPriorPhotos() {
+    guard detailProgress == nil else { return } // Structure photographs do not count as a new detail pass.
     let snapshot = house, zone = plan.zoneID, session = plan.sessionID
     Task.detached(priority: .utility) { [weak self] in
       let photos = PriorPhotos.load(house: snapshot, zone: zone, excludingSession: session)
@@ -654,7 +839,11 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     source.title = last.name
     return source
   }
-  var requiresFreshScan: Bool { warnedBigMap || rooms.count >= 4 }
+  var requiresFreshScan: Bool {
+    isFloorStructure
+      ? FloorCapturePolicy.shouldPause(sections: rooms.count, mapBytes: savedMapBytes, memoryWarning: floorMemoryWarning)
+      : warnedBigMap || rooms.count >= 4
+  }
 
   var selectedRoomID: String?
   var existingRooms: [HouseProject.Room] { house.rooms.filter { r in !r.history.contains { $0.session == plan.sessionID } } }
@@ -662,7 +851,7 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     roomName = room.name
     selectedRoomID = room.id
   }
-  var canStartRoom: Bool { phase == .betweenRooms && !sessionNeedsRestart && !recordingSaveFailed && !requiresFreshScan && !roomName.trimmingCharacters(in: .whitespaces).isEmpty }
+  var canStartRoom: Bool { phase == .betweenRooms && !sessionNeedsRestart && !recordingSaveFailed && !requiresFreshScan && (detailProgress?.locationReady ?? true) && !roomName.trimmingCharacters(in: .whitespaces).isEmpty }
 
   func startRoom() {
     guard canStartRoom else { return }
@@ -670,6 +859,8 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     catch { lastWarning = error.localizedDescription; return }
     recovery = TrackingRecovery()
     trackingIssue = recovery.issue
+    cameraStartupDelayed = false
+    hasTrackedCurrentRoom = false
     meshReadyAt = nil
     preStopMesh = nil
     lastWarning = nil
@@ -679,17 +870,36 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     paused = false
     scanView.feed.isOn = false
     roomStartedAt = Date()
+    detailActiveSeconds = 0; lastDetailTick = nil
+    detailCheckpointReason = nil; detailCheckpointAnnounced = false
+    detailProgress?.lastImprovementAt = Date()
     lastCoverageProgress = Date()
     lastProgressPercent = 0
     roomPhotoCount = 0
     hint = .none
     engine.setRoom(nil)
+    if let scope = detailProgress?.reviewedScope {
+      engine.setReviewedScope(targets: scope.targets, outline: scope.outline,
+                              floor: scope.floor, ceiling: scope.ceiling)
+    }
     scanView.showRoom(nil)
     phase = .scanning
     applyGhostOpacity()
     refreshCoverage()
     diagnostics.log("room \(roomIndex) '\(roomName)' start", since: startedAt)
-    roomSession.run(configuration: RoomCaptureSession.Configuration())
+    checkGeneration += 1
+    alignmentContinuity.beginConfirmation(required: usesRoomPlan && reference?.isEmpty == false)
+    if usesRoomPlan {
+      roomSession.run(configuration: RoomCaptureSession.Configuration())
+    } else {
+      if !sessionRunning {
+        let configuration = Self.relocalizationConfiguration(map: nil)
+        configureReferences?(configuration)
+        arSession.run(configuration)
+      }
+      ensureMeshAndDepth()
+      diagnostics.log("detail capture: retaining ARKit frame; RoomPlan not started", since: startedAt)
+    }
     sessionRunning = true
     UIApplication.shared.isIdleTimerDisabled = true
     startTicking()
@@ -699,6 +909,7 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
   /// running (mesh and all) so the next room lands in the same world.
   func finishRoom() {
     guard phase == .scanning else { return }
+    checkGeneration += 1
     if paused { resume() }
     commitCandidate(allowHighResolution: false)
     phase = .finishingRoom
@@ -711,7 +922,8 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
       preStopMesh = await withCheckedContinuation { c in engine.exportPLY(to: file) { c.resume(returning: $0) } }
       guard !closed, phase == .finishingRoom else { return }
       cameraControl.unlock()
-      roomSession.stop(pauseARSession: false)
+      if usesRoomPlan { roomSession.stop(pauseARSession: false) }
+      else { await finish(with: nil, error: nil) }
     }
   }
 
@@ -753,10 +965,10 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     Task { @MainActor in await self.finish(with: data, error: error) }
   }
 
-  private func finish(with data: CapturedRoomData, error: Error?) async {
+  private func finish(with data: CapturedRoomData?, error: Error?) async {
     // .scanning: RoomPlan ended on its own (tracking failure, scene too big): keep what it has
     guard !closed, phase == .finishingRoom || phase == .scanning else { return }
-    if error != nil { sessionNeedsRestart = true }
+    if error != nil { sessionNeedsRestart = true; checkpointContinuesFloor = false }
     if phase == .scanning {
       commitCandidate(allowHighResolution: false)
       cameraControl.unlock()
@@ -777,28 +989,40 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     var record = RoomRecord(
       index: index, name: roomName.trimmingCharacters(in: .whitespaces), file: "rooms/room-\(index).json",
       usdz: "rooms/room-\(index).usdz", capturedAt: capturedAt, walls: 0, doors: 0, windows: 0, openings: 0, objects: 0)
-    // raw capture data first: RoomBuilder can be re-run on it later even if it fails now
-    let dataFile = bundle.file("rooms/room-\(index)-data.json")
-    let savedData = await Task.detached(priority: .utility) { () -> Bool in
-      guard let json = try? ScanBundle.encodeRoomData(data) else { return false }
-      return (try? json.write(to: dataFile, options: .atomic)) != nil
-    }.value
-    if savedData { record.data = "rooms/room-\(index)-data.json" }
-    do {
-      let room = try await RoomBuilder(options: [.beautifyObjects]).capturedRoom(from: data)
-      try bundle.saveRoom(room, index: index)
-      record.walls = room.walls.count
-      record.doors = room.doors.count
-      record.windows = room.windows.count
-      record.openings = room.openings.count
-      record.objects = room.objects.count
-      capturedRooms.append(room)
-      engine.setRoom(room)
-      scanView.showRoom(room)
-    } catch {
-      lastWarning = "RoomPlan couldn't build the layout (\(error.localizedDescription)). The mesh and photos are still saved."
-      record.file = "" // no layout for this room; capturedRooms only holds rooms RoomPlan built
-      record.usdz = ""
+    // A detail pass has mesh/photos/depth, but does not invent a new RoomPlan layout.
+    record.file = ""; record.usdz = ""
+    if let data {
+      // raw capture data first: RoomBuilder can be re-run on it later even if it fails now
+      let dataFile = bundle.file("rooms/room-\(index)-data.json")
+      let savedData = await Task.detached(priority: .utility) { () -> Bool in
+        guard let json = try? ScanBundle.encodeRoomData(data) else { return false }
+        return (try? json.write(to: dataFile, options: .atomic)) != nil
+      }.value
+      if savedData { record.data = "rooms/room-\(index)-data.json" }
+      do {
+        let room = try await RoomBuilder(options: [.beautifyObjects]).capturedRoom(from: data)
+        try bundle.saveRoom(room, index: index)
+        record.file = "rooms/room-\(index).json"
+        record.usdz = "rooms/room-\(index).usdz"
+        record.walls = room.walls.count
+        record.doors = room.doors.count
+        record.windows = room.windows.count
+        record.openings = room.openings.count
+        record.objects = room.objects.count
+        if record.hasRoomPlanGeometry {
+          capturedRooms.append(room)
+          engine.setRoom(room)
+          scanView.showRoom(room)
+        } else {
+          // Retain raw files as evidence without offering an empty 3D preview.
+          record.file = ""
+          record.usdz = ""
+        }
+      } catch {
+        lastWarning = "RoomPlan couldn't build the layout (\(error.localizedDescription)). The mesh and photos are still saved."
+        record.file = "" // no layout for this room; capturedRooms only holds rooms RoomPlan built
+        record.usdz = ""
+      }
     }
     let meshFile = "mesh/room-\(index).ply"
     var result = preStopMesh
@@ -812,6 +1036,31 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     record.photoCoverage = record.photographedPercent
     record.detailSeconds = roomStartedAt.map { Date().timeIntervalSince($0) }
     record.detailPhotos = roomPhotoCount
+    guard record.hasMeasuredGeometry || (guidedContext?.step.isDetail == true && record.hasDetailEvidence) else {
+      // A successful RoomBuilder call does not guarantee that it measured anything.
+      sessionNeedsRestart = true
+      lastWarning = "No room geometry was captured. This space has not been completed. Diagnostic files and any reference photos are kept."
+      diagnostics.log("room \(index) rejected: no measured geometry; photos=\(roomPhotoCount)", since: startedAt)
+      do {
+        try depthRecorder.save()
+        try bundle.savePhotos(photos)
+        try writeManifest()
+      } catch {
+        recordingSaveFailed = true
+        lastWarning = "The empty scan could not be indexed: \(error.localizedDescription). Files already written are kept."
+      }
+      arSession.pause()
+      sessionRunning = false
+      stopTicking()
+      UIApplication.shared.isIdleTimerDisabled = false
+      phase = .betweenRooms
+      floorSavingCheckpoint = false; checkpointContinuesFloor = false
+      refreshCoverage()
+      return
+    }
+    if !record.hasMeasuredGeometry {
+      lastWarning = "Reference photos saved without new room geometry. They can be uploaded for review; the saved floor structure is unchanged."
+    }
     rooms.append(record)
     pendingRoomIDs[index] = selectedRoomID
     do {
@@ -842,6 +1091,32 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     phase = .betweenRooms
     applyGhostOpacity()
     refreshCoverage()
+    if isFloorStructure {
+      let continues = checkpointContinuesFloor
+      checkpointContinuesFloor = false; floorSavingCheckpoint = false
+      if finishFloorAfterSection || (continues && requiresFreshScan) {
+        floorPausedForResources = !finishFloorAfterSection
+        if floorPausedForResources { diagnostics.log("floor checkpoint saved; pause for bounded capture resources; resume this floor", since: startedAt) }
+        finishFloorAfterSection = false
+        await finishSession()
+      } else if continues && !sessionNeedsRestart && !recordingSaveFailed {
+        // Verify every RoomPlan reconfiguration against the section just saved,
+        // including newly explored space outside the original relocalization map.
+        let meshURL = bundle.file(meshFile)
+        let checkpointReference = await Task.detached(priority: .utility) {
+          ZoneReference.build([(url: meshURL, toZone: matrix_identity_float4x4, name: "Latest floor checkpoint")])
+        }.value
+        guard !closed else { return }
+        if checkpointReference.isEmpty {
+          sessionNeedsRestart = true
+          lastWarning = "The saved checkpoint could not be checked for continuation. Keep this section for Mac review."
+          return
+        }
+        reference = checkpointReference; referenceLoaded = true
+        roomName = "\(floorTitle) · section \(rooms.count + 1)"
+        startRoom()
+      }
+    }
   }
 
   /// Throws away the most recently captured room (e.g. to rescan it).
@@ -921,12 +1196,39 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     await buildZoneStructure()
     try? writeManifest(structure: structureFile, structureError: structureError)
     phase = .done
+    releaseCaptureResources()
+  }
+
+  /// Release camera/geometry even if a dismissed SwiftUI screen lives for another turn.
+  /// Accepted writes and the final manifest have completed before this runs.
+  private func releaseCaptureResources() {
+    closed = true
+    checkGeneration += 1
+    stopTicking()
+    noticeTask?.cancel(); noticeTask = nil
+    NotificationCenter.default.removeObserver(self)
+    configureReferences = nil
+    cameraControl.unlock()
+    arSession.pause(); sessionRunning = false
+    roomSessionStorage?.delegate = nil
+    roomSessionStorage = nil
+    arSession.delegate = nil
+    scanView.releaseResources()
+    engine.releaseResources()
+    reference = nil; relocMap = nil; preparedDetailReference = nil
+    candidate = nil; previousPose = nil; poseHistory.removeAll()
+    enginePhotos.removeAll(); priorPhotos.removeAll(); capturedRooms.removeAll()
+    liveRoom = nil
+    ciContext.clearCaches()
+    UIApplication.shared.isIdleTimerDisabled = false
   }
 
   /// All active rooms of the zone that are in the zone frame, merged by RoomPlan into
   /// zones/<zone>/structure.usdz (only rooms whose sessions share the frame, or StructureBuilder
   /// throws invalidRoomLocation). A preview product; errors only get logged.
   private func buildZoneStructure() async {
+    // Detail passes add reference evidence; never replace the reviewed floor structure.
+    guard guidedContext?.step.isDetail != true else { return }
     let zone = plan.zoneID
     let frameSessions = Set(house.sessionsInZone(zone).filter { HouseProject.zoneFrameMethods.contains($0.alignment.method) }.map(\.id))
     guard frameSessions.contains(plan.sessionID) else { return }
@@ -953,12 +1255,20 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
 
   /// Leave without saving anything: the session disappears from the house.
   func abandon() {
+    // Keep one bounded local diagnostic when an empty recovery attempt is discarded.
+    // It contains counts and status, not camera images, and does not enter the scan library.
+    if phase == .relocalizing, let data = try? JSONEncoder().encode(diagnostics) {
+      let folder = GuidedRoute.documents.appendingPathComponent("Diagnostics")
+      try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+      try? data.write(to: folder.appendingPathComponent("last-relocalization.json"), options: .atomic)
+    }
     closed = true
     stopTicking()
     if roomSessionCreated, phase == .scanning || phase == .finishingRoom { roomSession.stop() }
     arSession.pause()
     sessionRunning = false
     UIApplication.shared.isIdleTimerDisabled = false
+    releaseCaptureResources()
     try? HouseProject.deleteSession(houseID: house.id, sessionID: plan.sessionID)
   }
 
@@ -1003,6 +1313,7 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     let written = await Task.detached(priority: .utility) { Result { try WorldMapFile.write(map, to: targets) } }.value
     switch written {
     case .success(let bytes):
+      savedMapBytes = bytes
       worldMapSaved = true
       worldMapStatus = status == .mapped ? "mapped" : "extending (saved before ARKit finished mapping: may relocalize less reliably)"
       let mb = Double(bytes) / 1_000_000
@@ -1015,7 +1326,7 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
           lastWarning = "Couldn't update house.json: \(error.localizedDescription)"
         }
       }
-      if mb > 40, !warnedBigMap {
+      if !isFloorStructure, mb > 40, !warnedBigMap {
         warnedBigMap = true
         lastWarning = "Finish and save this scan before scanning another room. The next scan will start fresh to keep capture responsive."
       }
@@ -1106,6 +1417,7 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
       diagnostics.roomPlanConfiguration = "\(type(of: c)) reconstruction=\(c.sceneReconstruction.rawValue) semantics=\(c.frameSemantics.rawValue) worldMap=\(c.initialWorldMap != nil)"
     }
     updated.initialWorldMap = nil
+    configureReferences?(updated)
     updated.sceneReconstruction.insert(.meshWithClassification)
     if ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth) { updated.frameSemantics.insert(.sceneDepth) }
     meshReady = false
@@ -1117,6 +1429,7 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
   @objc private func memoryWarning() {
     guard !closed else { return }
     memoryPressureUntil = CACurrentMediaTime() + 60
+    if isFloorStructure { floorMemoryWarning = true }
     candidate = nil
     diagnostics.memoryWarnings = (diagnostics.memoryWarnings ?? 0) + 1
     diagnostics.log("memory warning", since: startedAt)
@@ -1250,6 +1563,9 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     else if let frame, now - frame.timestamp < 0.5 { problem = TrackingRecovery.problem(for: frame.camera.trackingState) }
     else { problem = .stalled }
     recovery.update(problem: problem, now: now)
+    if problem == nil { hasTrackedCurrentRoom = true }
+    let startupDelayed = !hasTrackedCurrentRoom && (roomStartedAt.map { Date().timeIntervalSince($0) >= 12 } ?? false)
+    if cameraStartupDelayed != startupDelayed { cameraStartupDelayed = startupDelayed }
     if trackingIssue != recovery.issue {
       trackingIssue = recovery.issue
       diagnostics.log("capture tracking: \(trackingIssue.map { String(describing: $0) } ?? "ready")", since: startedAt)
@@ -1309,7 +1625,7 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
       return
     }
     // relocalized: keep checking the live mesh against the saved one
-    if alignment.method == "relocalized", let reference, !reference.isEmpty, !paused, !checkInFlight,
+    if let reference, !reference.isEmpty, !paused, !checkInFlight,
        phase == .betweenRooms || phase == .scanning, now - lastCheckAt > 2.5, case .normal = frame.camera.trackingState {
       runCheck(frame, reference: reference)
     }
@@ -1323,6 +1639,12 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
       diagnostics.whiteBalance = cameraControl.summary
     }
     guard !paused, captureReady else { return }
+    if isFloorStructure, let began = roomStartedAt,
+       FloorCapturePolicy.checkpointDue(elapsed: Date().timeIntervalSince(began), tracking: captureReady, paused: paused, walls: liveRoom?.walls.count ?? 0, interval: floorCheckpointInterval) {
+      checkpointContinuesFloor = true; floorSavingCheckpoint = true
+      finishRoom()
+      return
+    }
     let budget = captureBudget
     depthRecorder.consider(frame, room: roomIndex, camera: cameraControl.state(for: frame), interval: budget.depthInterval)
     if frame.timestamp - lastEvaluate > budget.evaluationInterval {
@@ -1481,7 +1803,15 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
     var k = shot.intrinsics
     k.columns.0.x *= Float(scale); k.columns.1.y *= Float(scale); k.columns.2.x *= Float(scale); k.columns.2.y *= Float(scale)
     let size = CGSize(width: (shot.resolution.width * scale).rounded(), height: (shot.resolution.height * scale).rounded())
+    let detailName = detailObjectName.trimmingCharacters(in: .whitespacesAndNewlines)
+    let detailKey = "\(roomIndex)/\(detailName)"
+    let detailID: String? = manual && !detailName.isEmpty ? (detailObjectIDs[detailKey] ?? UUID().uuidString) : nil
+    if let detailID { detailObjectIDs[detailKey] = detailID }
     let record = PhotoRecord(
+      objectID: detailID,
+      objectName: detailID == nil ? nil : detailName,
+      referenceView: detailID == nil ? nil : detailView,
+      cleanReferenceReported: detailID == nil ? nil : detailCleanPhoto,
       file: "photos/\(fileName)",
       room: roomIndex,
       timestamp: shot.timestamp,
@@ -1493,7 +1823,7 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
       manual: manual,
       exposure: shot.exposure,
       blurPixels: manual ? nil : shot.blur * Float(scale),
-      pass: "scan",
+      pass: detailID == nil ? "scan" : "object-detail",
       highRes: shot.highRes,
       camera: shot.camera
     )
@@ -1524,6 +1854,7 @@ final class CaptureController: NSObject, ObservableObject, RoomCaptureSessionDel
           self.photoViews.append((record.room, view))
           self.enginePhotos.append(enginePhoto)
           self.engine.add(enginePhoto)
+          if self.captureReady, self.alignment.method == "relocalized" { self.detailProgress?.record(enginePhoto, bundle: self.bundle.url) }
           self.photoCount = self.photos.count
           self.roomPhotoCount += 1
           self.refreshCoverage()

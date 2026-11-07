@@ -28,6 +28,10 @@ enum PreviewDebug {
   /// App entry: `if let preview = PreviewDebug.launchView() { preview } else { … }`
   @MainActor static func launchView() -> AnyView? {
     #if DEBUG
+    if args.contains("-preview-detail-guidance") || args.contains("-preview-detail-map") { return AnyView(DetailGuidanceDebugView()) }
+    if args.contains("-check-floor-recovery") { return AnyView(FloorRecoveryDebugView()) }
+    if let nonce = value("-scan-inventory") { return AnyView(ScanResetDebugView(nonce: nonce, inventoryOnly: true)) }
+    if let nonce = value("-archive-scans-once") { return AnyView(ScanResetDebugView(nonce: nonce)) }
     // Open the real Fieldwork room screen against simulator fixtures for visual checks.
     if let houseID = value("-fieldwork-house"), let roomID = value("-fieldwork-room") {
       return AnyView(NavigationStack {

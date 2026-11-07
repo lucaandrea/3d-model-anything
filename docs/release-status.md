@@ -14,7 +14,7 @@ Validated locally:
 
 ## iPhone distribution
 
-The app's display name is **3D Model Anything**. `house-capture/5`, existing serialized keys, the Xcode target and `com.wesbos.housecapture` bundle identifier remain unchanged for compatibility. Contributors select their own signing team in Xcode.
+The app's display name is **3D Model Anything**. `house-capture/5`, existing serialized keys and the Xcode target remain unchanged for compatibility. This checkout uses Luca Andrea Collins's team and the distinct `ooo.luca.modelanything` bundle identifier. The App Store Connect name is **3D Model Anything by Luca**. See [Luca's setup](luca-setup.md) for the actual internal distribution and validation status.
 
 Source publication does not submit the app to Apple. Before TestFlight/App Store release:
 - Verify the configured public privacy/support URLs and GitHub Issues support link.

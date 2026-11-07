@@ -1,6 +1,6 @@
 {
   "title": "Help & support",
-  "updated": "October 7, 2026",
+  "updated": "October 27, 2026",
   "sections": [
     {
       "title": "Supported devices",
@@ -21,6 +21,14 @@
     {
       "title": "Share and AirDrop",
       "body": "Open a room and tap Share room, then choose AirDrop or another destination in the system share sheet. This shares the active scan’s layout, mesh, photos and depth data. Use Scan history → Use this scan to share an older version. The house options menu can share the whole house, and Sessions can share an entire capture session. No receiver, companion app, or account is needed."
+    },
+    {
+      "title": "Pair with House Control on your Mac",
+      "body": "Open Paired capture from the scanner home screen. Use the capture pairing link from House Control on your Mac, allow local-network access, and download the matching card kit. Pairing keys are private; printed card QR codes only identify cards and cannot pair or control devices. While connected, scanning sends live geometry and coverage previews. Select a finished session under Send saved captures to transfer its original files. If a transfer stops, reconnect and select the same session to resume. AirDrop works without pairing."
+    },
+    {
+      "title": "Printed cards and object details",
+      "body": "Print cards at Actual Size / 100% on matte paper and measure the 100 mm ruler. Mount checkpoint cards flat on fixed building features. In Details & cards, select a device card or name an object and choose a reference view before taking a photograph. Capture clean views without temporary cards where possible. Card detection alone does not verify room alignment: complete the orientation and independent measurement checks in House Control before placing device controls."
     },
     {
       "title": "Photo detail and previews",

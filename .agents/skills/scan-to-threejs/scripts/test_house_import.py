@@ -126,6 +126,18 @@ class ImportTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             prepare(self.root / 'sessions/new', room, photos)
 
+    def test_object_detail_evidence_survives_conversion(self):
+        source = self.root / 'sessions/new/photos/photos.json'
+        records = json.loads(source.read_text())
+        records[1].update(objectID='lamp-id', objectName='Desk lamp', referenceView='back', cleanReferenceReported=True)
+        write(source, records)
+        index = export_house(self.root, self.base / 'out')
+        room = json.loads((self.base / 'out' / index['rooms'][0]['file']).read_text())
+        photo = room['photos'][0]
+        self.assertEqual(photo['objectID'], 'lamp-id')
+        self.assertEqual(photo['referenceView'], 'back')
+        self.assertTrue(photo['cleanReferenceReported'])
+
 
 if __name__ == '__main__':
     unittest.main()

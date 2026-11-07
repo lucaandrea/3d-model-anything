@@ -133,7 +133,13 @@ async function prepareRendering() {
     renderedRoom = owner;
     statusEl.textContent = roomById(roomId).label;
     })();
-    try { await preparing; } finally { preparing = undefined; invalidate(); }
+    try {
+      await preparing;
+    } catch (error) {
+      statusEl.textContent = `Could not prepare the 3D view: ${error instanceof Error ? error.message : String(error)}`;
+      loaderEl.classList.add('done');
+      throw error;
+    } finally { preparing = undefined; invalidate(); }
   }
 }
 
@@ -184,6 +190,7 @@ async function loadRoom(id: string, updated?: RoomModule) {
   referenceLoading = undefined;
   referenceEpoch++;
   room = next;
+  hud.querySelector<HTMLButtonElement>('[data-source=model]')!.textContent = room.modelLabel ?? 'Rebuilt';
   activeRoomId = mod.id;
   transition = undefined;
   movingRatio = Math.min(window.devicePixelRatio, 1);
@@ -252,7 +259,8 @@ function setProgress(p: number) {
 // --- Source: rebuilt model, raw scan/layout, or both overlaid ----------------------
 
 type Source = 'model' | 'scan' | 'overlay' | 'wireframe';
-let source: Source = 'model';
+const requestedSource = new URLSearchParams(location.search).get('source');
+let source: Source = requestedSource === 'scan' || requestedSource === 'overlay' || requestedSource === 'wireframe' ? requestedSource : 'model';
 // A render-only override keeps original textures/materials intact, including cached rooms.
 const wireframeMaterial = new THREE.MeshBasicMaterial({
   color: '#9de2f0', wireframe: true, toneMapped: false, side: THREE.DoubleSide,
@@ -308,6 +316,11 @@ async function setSource(next: Source, force = false) {
     }
   }
   activate('source', next);
+  const url = new URL(location.href);
+  if (next === 'model') url.searchParams.delete('source');
+  else url.searchParams.set('source', next);
+  history.replaceState(null, '', url);
+  updateWallControls();
   invalidate();
 }
 
@@ -359,6 +372,7 @@ function setMode(next: Mode) {
   if (mode !== 'layout' && mode !== 'knolling') void prepareRendering();
   navigation.hidden = mode !== 'orbit';
   activate('mode', mode);
+  updateWallControls();
   invalidate();
   hud.querySelectorAll<HTMLElement>('.help').forEach((el) => {
     el.hidden = el.dataset.for !== mode;
@@ -386,6 +400,42 @@ document.addEventListener('pointerlockerror', () => setMode('orbit'));
 
 // --- Dollhouse cutaway: hide walls between the camera and the room ---------
 
+type WallVisibility = 'cutaway' | 'full';
+let wallVisibility: WallVisibility = new URLSearchParams(location.search).get('walls') === 'full' ? 'full' : 'cutaway';
+const wallSection = document.createElement('section');
+wallSection.className = 'control-section wall-visibility-section';
+wallSection.innerHTML = `<h2>Walls</h2>
+  <div class="buttons segmented wall-visibility" role="group" aria-label="Wall visibility">
+    <button type="button" data-walls="cutaway" aria-pressed="false">Cutaway</button>
+    <button type="button" data-walls="full" aria-pressed="false">Full walls</button>
+  </div>
+  <p class="wall-visibility-note" id="wall-visibility-note"></p>`;
+hud.querySelector('.source-section')!.after(wallSection);
+const wallButtons = wallSection.querySelectorAll<HTMLButtonElement>('[data-walls]');
+function updateWallControls() {
+  wallButtons.forEach(button => {
+    const selected = button.dataset.walls === (mode === 'walk' ? 'full' : wallVisibility);
+    button.classList.toggle('active', selected);
+    button.setAttribute('aria-pressed', String(selected));
+    button.disabled = source === 'scan' || mode === 'walk';
+  });
+  wallSection.querySelector('p')!.textContent = source === 'scan'
+    ? 'Choose Rebuilt or Overlay to adjust the model walls.'
+    : mode === 'walk' ? 'Walk around keeps every wall visible.'
+    : wallVisibility === 'full' ? 'All walls stay visible. Orbit above to look inside.'
+    : 'Near walls are hidden so you can see inside. They are still in the model.';
+}
+wallButtons.forEach(button => button.addEventListener('click', () => {
+  wallVisibility = button.dataset.walls as WallVisibility;
+  const url = new URL(location.href);
+  if (wallVisibility === 'full') url.searchParams.set('walls', 'full');
+  else url.searchParams.delete('walls');
+  history.replaceState(null, '', url);
+  updateWallControls();
+  invalidate();
+}));
+updateWallControls();
+
 const mid = new THREE.Vector3();
 const toCam = new THREE.Vector3();
 function updateCutaway() {
@@ -393,7 +443,7 @@ function updateCutaway() {
   const inside = mode === 'walk';
   for (const { def, group } of room.walls) {
     mid.copy(def.origin).addScaledVector(def.u, def.length / 2);
-    group.visible = inside || toCam.copy(camera.position).sub(mid).dot(def.n) > 0;
+    group.visible = inside || wallVisibility === 'full' || toCam.copy(camera.position).sub(mid).dot(def.n) > 0;
   }
   for (const c of room.ceiling) c.visible = inside || camera.position.y < room.wallTop;
 }
@@ -489,10 +539,10 @@ navigation.querySelector<HTMLButtonElement>('[data-zoom=out]')!.addEventListener
 orbit.addEventListener('start', () => { transition = undefined; lastMotion = performance.now(); requestFrame(); });
 canvas.addEventListener('pointerdown', () => canvas.focus({ preventScroll: true }));
 const raycaster = new THREE.Raycaster();
-canvas.addEventListener('dblclick', event => {
+function focusAt(clientX: number, clientY: number) {
   if (!room || mode !== 'orbit') return;
   const rect = canvas.getBoundingClientRect();
-  raycaster.setFromCamera(new THREE.Vector2((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1), camera);
+  raycaster.setFromCamera(new THREE.Vector2((clientX - rect.left) / rect.width * 2 - 1, -(clientY - rect.top) / rect.height * 2 + 1), camera);
   const meshes: THREE.Object3D[] = [];
   for (const root of [room.group, reference]) root?.traverseVisible(o => { if ((o as THREE.Mesh).isMesh) meshes.push(o); });
   const hit = raycaster.intersectObjects(meshes, false)[0];
@@ -500,7 +550,27 @@ canvas.addEventListener('dblclick', event => {
   const offset = camera.position.clone().sub(hit.point);
   offset.setLength(THREE.MathUtils.clamp(offset.length() * 0.65, 0.6, orbit.maxDistance));
   moveCamera(hit.point.clone().add(offset), hit.point.clone());
+}
+let lastTouch = 0, previousTap = { x: 0, y: 0, time: 0 };
+let touchStart: { id: number; x: number; y: number; time: number } | undefined;
+const touchPointers = new Set<number>();
+canvas.addEventListener('dblclick', event => { if (performance.now() - lastTouch > 700) focusAt(event.clientX, event.clientY); });
+canvas.addEventListener('pointerdown', event => {
+  if (event.pointerType !== 'touch') return;
+  touchPointers.add(event.pointerId);
+  touchStart = touchPointers.size === 1 ? { id:event.pointerId,x:event.clientX,y:event.clientY,time:performance.now() } : undefined;
 });
+canvas.addEventListener('pointerup', event => {
+  touchPointers.delete(event.pointerId);
+  if (event.pointerType !== 'touch') return;
+  const now = performance.now(); lastTouch = now;
+  if (touchStart?.id === event.pointerId && now - touchStart.time < 350 && Math.hypot(event.clientX-touchStart.x,event.clientY-touchStart.y) < 12) {
+    if (now-previousTap.time < 350 && Math.hypot(event.clientX-previousTap.x,event.clientY-previousTap.y) < 30) { focusAt(event.clientX,event.clientY); previousTap.time = 0; }
+    else previousTap = { x:event.clientX,y:event.clientY,time:now };
+  }
+  touchStart = undefined;
+});
+canvas.addEventListener('pointercancel', event => { touchPointers.delete(event.pointerId); touchStart = undefined; previousTap.time = 0; });
 
 type Quality = 'auto' | 'detail' | 'fast';
 const qualitySelect = document.querySelector<HTMLSelectElement>('#quality')!;
@@ -516,6 +586,12 @@ qualitySelect.addEventListener('change', () => {
 const cameraCoordinates = document.querySelector<HTMLOutputElement>('#camera-coordinates')!;
 const cameraLink = document.querySelector<HTMLInputElement>('#camera-link')!;
 const cameraCopyStatus = document.querySelector<HTMLElement>('#camera-copy-status')!;
+document.querySelector<HTMLAnchorElement>('#review-link')!.addEventListener('click', event => {
+  const query = new URLSearchParams({ room: activeRoomId || roomId, view: mode });
+  if (wallVisibility === 'full') query.set('walls', 'full');
+  if (mode === 'orbit') query.set('camera', [...camera.position.toArray(), ...orbit.target.toArray(), camera.fov].map(n => Number(n.toFixed(5))).join(','));
+  (event.currentTarget as HTMLAnchorElement).href = `/review.html?${new URLSearchParams({room:activeRoomId || roomId,from:`?${query}`})}`;
+});
 function updateCameraHelper() {
   if (!room || mode !== 'orbit') return;
   const values = [...camera.position.toArray(), ...orbit.target.toArray(), camera.fov].map(n => Number(n.toFixed(5)));
@@ -667,4 +743,10 @@ updateCameraHelper();
 
 if (import.meta.env.DEV) Object.assign(window, { __viewer: { renderer, scene, camera, pipeline, orbit,
   get room() { return room; }, get stats() { return { renderedFrames, pendingFrame, movingRatio, quality }; } } });
+
+if (import.meta.env.DEV && new URLSearchParams(location.search).has('diagnostics')) {
+  setInterval(() => {
+    statusEl.textContent = `${roomById(roomId).label} · ${document.visibilityState} · ${renderedFrames} frames · pending ${pendingFrame} · ${renderer.getContext().isContextLost() ? 'context lost' : 'context ready'} · ${viewport.clientWidth} × ${viewport.clientHeight}`;
+  }, 1000);
+}
 

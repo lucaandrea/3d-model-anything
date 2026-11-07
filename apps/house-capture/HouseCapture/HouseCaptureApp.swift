@@ -14,8 +14,8 @@ struct HouseCaptureApp: App {
         DiagnosticsView()
       } else if args.contains("-selftest") {
         SelfTestView()
-      } else if args.contains("-autotest") || args.contains("-autotest-continue") {
-        AutoTestView(continueLatest: args.contains("-autotest-continue"))
+      } else if args.contains("-autotest") || args.contains("-autotest-continue") || args.contains("-autotest-floor") {
+        AutoTestView(continueLatest: args.contains("-autotest-continue"), floorTest: args.contains("-autotest-floor"))
       } else {
         HomeView()
       }
@@ -40,6 +40,10 @@ struct HomeView: View {
   /// bumped when a capture closes so the house screen reloads
   @State private var generation = 0
   @State private var openedFromArgs = false
+  @State private var guidedRoute: GuidedRoute?
+  @State private var showingRoute = false
+  @State private var openedRouteFromArgs = false
+  @ObservedObject private var pairedCapture = PairedCaptureModel.shared
 
   var body: some View {
     NavigationStack(path: $path) {
@@ -48,9 +52,19 @@ struct HomeView: View {
           VStack(alignment: .leading, spacing: 14) {
             FieldworkEyebrow(text: "A record of your spaces")
             Text("3D Model Anything").font(.largeTitle.weight(.bold)).tracking(-1)
-            Text("Room by room. Every detail.").font(.title3).foregroundStyle(Fieldwork.secondary)
+            Text("Structure first. Then every detail.").font(.title3).foregroundStyle(Fieldwork.secondary)
           }.padding(.top, 20).padding(.bottom, 36)
           FieldworkRule()
+          if let guidedRoute {
+            Button { showingRoute = true } label: {
+              VStack(alignment: .leading, spacing: 10) {
+                Label(guidedRoute.title, systemImage: "point.topleft.down.to.point.bottomright.curvepath").font(.title2.bold())
+                Text("Choose your room, see missing detail views, then save and upload each short pass.").font(.subheadline)
+                Text("Open room progress →").font(.headline).foregroundStyle(Fieldwork.orange)
+              }.frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, 24)
+            }.buttonStyle(.plain)
+            FieldworkRule()
+          }
           if houses.isEmpty {
             VStack(alignment: .leading, spacing: 18) {
               Image(systemName: "house.lodge").font(.system(size: 64, weight: .ultraLight)).foregroundStyle(Fieldwork.orange)
@@ -91,7 +105,9 @@ struct HomeView: View {
           Button { importing = true } label: { Image(systemName: "square.and.arrow.down").frame(width: 44, height: 44) }
             .accessibilityLabel("Import room folder").disabled(working)
         }
-        ToolbarItem(placement: .topBarTrailing) {
+        ToolbarItemGroup(placement: .topBarTrailing) {
+          NavigationLink { ScanLibraryScreen() } label: { Image(systemName: "archivebox").frame(width: 44, height: 44) }.accessibilityLabel("Scan library and archives")
+          Button("Paired capture", systemImage: "viewfinder.rectangular") { pairedCapture.showSetup = true }
           NavigationLink { AppHelpScreen() } label: { Image(systemName: "questionmark.circle").frame(width: 44, height: 44) }.accessibilityLabel("Help and privacy")
         }
       }
@@ -115,6 +131,11 @@ struct HomeView: View {
         HouseScreen(houseID: id, generation: generation, onCapture: startCapture, onGone: { path.removeAll() })
       }
       .onAppear(perform: reload)
+      .fullScreenCover(isPresented: $showingRoute, onDismiss: reload) { NavigationStack { GuidedRouteScreen() } }
+      .onOpenURL { pairedCapture.open($0) }
+      .sheet(isPresented: $pairedCapture.showSetup) {
+        NavigationStack { PairedCaptureView().toolbar { Button("Done") { pairedCapture.showSetup = false } } }
+      }
       .alert("Something went wrong", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
         Button("OK") { error = nil }
         if AVCaptureDevice.authorizationStatus(for: .video) == .denied {
@@ -155,8 +176,21 @@ struct HomeView: View {
 
   private func reload() {
     houses = HouseProject.all()
+    #if DEBUG && targetEnvironment(simulator)
+    let fixtureArgs = ProcessInfo.processInfo.arguments
+    if let i = fixtureArgs.firstIndex(of: "-floor-route-fixture"), fixtureArgs.indices.contains(i + 1),
+       let data = Data(base64Encoded: fixtureArgs[i + 1]), data.count < 128_000,
+       let route = try? JSONDecoder().decode(GuidedRoute.self, from: data), (try? route.validate()) != nil {
+      try? data.write(to: GuidedRoute.configurationURL, options: .atomic)
+    }
+    #endif
+    guidedRoute = try? GuidedRoute.load()
     // `-house <id>`: open that house directly (screenshots, debugging)
     let args = ProcessInfo.processInfo.arguments
+    if !openedRouteFromArgs, guidedRoute != nil, args.contains("-guided-route") {
+      openedRouteFromArgs = true
+      showingRoute = true
+    }
     if path.isEmpty, !openedFromArgs, let i = args.firstIndex(of: "-house"), i + 1 < args.count {
       openedFromArgs = true
       path = [args[i + 1]]
@@ -189,6 +223,17 @@ struct HomeView: View {
 
   private func startCapture(houseID: String, zoneID: String?, newZone: String?, roomID: String? = nil) {
     guard !working else { return }
+    if let house = try? HouseProject.load(id: houseID),
+       let context = FloorScanLibrary.continuation(house: house, roomID: roomID, zoneID: zoneID) {
+      // A checkpoint is part of its floor, never a new ad-hoc room or tracking zone.
+      let routeModel = GuidedRouteModel()
+      guard routeModel.route?.id == context.routeID, routeModel.state?.houseID == house.id else {
+        error = "This floor belongs to a different saved route. Its files are preserved; restore that route before continuing."
+        return
+      }
+      showingRoute = true
+      return
+    }
     working = true
     Task {
       defer { working = false }
@@ -230,8 +275,7 @@ private struct HouseRow: View {
   }
 
   private var summary: String {
-    let rooms = house.rooms.count, sessions = house.sessions.count
-    var s = "\(rooms) room\(rooms == 1 ? "" : "s") · \(sessions) session\(sessions == 1 ? "" : "s")"
+    var s = FloorScanLibrary.summary(house: house, groups: FloorScanLibrary.groups(in: house))
     if house.zones.count > 1 { s += " · \(house.zones.count) areas" }
     if let last = house.sessions.map(\.startedAt).max() { s += " · last \(last.formatted(date: .abbreviated, time: .shortened))" }
     return s

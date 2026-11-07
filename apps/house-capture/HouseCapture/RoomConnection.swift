@@ -51,7 +51,8 @@ struct RoomConnection: View {
   var body: some View {
     Form {
       Section {
-        Text("Match the same doorway in two rooms. If it wasn't captured in both scans, continue scanning from a saved room and include both sides of the doorway.")
+        Text("This screen aligns two existing scans; it does not start the next room. Use the guided scan route from the home screen to save, upload and move through your spaces.")
+        Text("Match the same real doorway in two scans. Include the same doorway and nearby fixed corners on both sides. Open-plan boundaries can be aligned later using overlap and measured checkpoints.")
         Picker("Connect \(source.name) to", selection: $targetID) {
           Text("Choose room").tag("")
           ForEach(house.rooms.filter { $0.id != source.id }) { Text($0.name).tag($0.id) }
@@ -62,7 +63,12 @@ struct RoomConnection: View {
         doorPicker("Doorway in other room", doors: targetDoors, selection: $targetDoorID)
         Text("Tap the matching doorway numbers on each room plan. Widths help distinguish similar openings.").font(.caption)
         Toggle("Rooms face opposite sides of doorway", isOn: $flip)
-        if target?.zone == source.zone { Text("These rooms already share a tracking frame.") }
+        if let target, target.zone == source.zone,
+           let sr = source.active, let tr = target.active,
+           let ss = house.session(sr.session), let ts = house.session(tr.session),
+           ss.alignment.method != "unaligned", ts.alignment.method != "unaligned" {
+          Text("These scans already share a tracking frame. Their physical house alignment still needs validation.")
+        }
         if let target, house.zone(target.zone)?.aligned != true { Text("Choose a room already placed in the house as the reference.") }
         if sourceDoors.isEmpty || (target != nil && targetDoors.isEmpty) { Text("A doorway is missing. Capture a connecting hallway or doorway before joining these rooms.") }
         if candidate == nil { Text("Choose compatible doorways (within 20 cm in width) in separately captured rooms with established tracking.").font(.caption) }

@@ -1,0 +1,1091 @@
+[
+ {
+  "id": "abo-B07HYY8ZGY",
+  "name": "Westcott Contemporary Sofa, 93\"",
+  "brand": "Stone & Beam",
+  "source": "Amazon Berkeley Objects",
+  "category": "Sofas",
+  "build": "sofa",
+  "file": "abo/B07HYY8ZGY.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B07HYY8ZGY",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "fabric",
+  "colors": [
+   {
+    "name": "Haze",
+    "hex": "#9aa0a3"
+   }
+  ],
+  "style": [
+   "modern",
+   "contemporary"
+  ],
+  "w": 2.415,
+  "d": 0.969,
+  "h": 0.867
+ },
+ {
+  "id": "abo-B07BWM2CR9",
+  "name": "Edgewest Low-Back Right-Facing L Sectional, 116\"",
+  "brand": "Rivet",
+  "source": "Amazon Berkeley Objects",
+  "category": "Sofas",
+  "build": "sectional_l",
+  "file": "abo/B07BWM2CR9.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B07BWM2CR9",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "fabric",
+  "colors": [
+   {
+    "name": "Charcoal",
+    "hex": "#4a4c4f"
+   }
+  ],
+  "style": [
+   "modern",
+   "mid-century"
+  ],
+  "w": 2.972,
+  "d": 1.984,
+  "h": 0.858
+ },
+ {
+  "id": "abo-B07DBHCKJ5",
+  "name": "Ryleigh Mid-Century Barrel Accent Chair",
+  "brand": "Ravenna Home",
+  "source": "Amazon Berkeley Objects",
+  "category": "Chairs",
+  "build": "armchair",
+  "file": "abo/B07DBHCKJ5.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B07DBHCKJ5",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "fabric",
+  "colors": [
+   {
+    "name": "Oatmeal",
+    "hex": "#c9bca8"
+   }
+  ],
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "w": 0.798,
+  "d": 0.704,
+  "h": 0.815
+ },
+ {
+  "id": "abo-B07BTRTC76",
+  "name": "Ian Modern Wood Dining Chair",
+  "brand": "Rivet",
+  "source": "Amazon Berkeley Objects",
+  "category": "Dining chairs",
+  "build": "dining_chair",
+  "file": "abo/B07BTRTC76.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B07BTRTC76",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "wood",
+  "colors": [
+   {
+    "name": "Grey / walnut",
+    "hex": "#7d7770"
+   }
+  ],
+  "style": [
+   "modern",
+   "mid-century"
+  ],
+  "w": 0.548,
+  "d": 0.636,
+  "h": 0.916
+ },
+ {
+  "id": "abo-B07B7BJK89",
+  "name": "Boundary Reclaimed Fir Dining Table, 66\"",
+  "brand": "Rivet",
+  "source": "Amazon Berkeley Objects",
+  "category": "Dining tables",
+  "build": "dining_table",
+  "file": "abo/B07B7BJK89.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B07B7BJK89",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "wood",
+  "colors": [
+   {
+    "name": "Reclaimed fir",
+    "hex": "#9b7a58"
+   }
+  ],
+  "style": [
+   "rustic",
+   "industrial"
+  ],
+  "w": 1.609,
+  "d": 0.946,
+  "h": 0.78
+ },
+ {
+  "id": "abo-B072ZLCB3M",
+  "name": "Bristol Natural-Edge Metal Side Table",
+  "brand": "Rivet",
+  "source": "Amazon Berkeley Objects",
+  "category": "Side tables",
+  "build": "side_table",
+  "file": "abo/B072ZLCB3M.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B072ZLCB3M",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "wood",
+  "colors": [
+   {
+    "name": "Walnut slab",
+    "hex": "#7a5235"
+   }
+  ],
+  "style": [
+   "organic modern",
+   "industrial"
+  ],
+  "w": 0.477,
+  "d": 0.494,
+  "h": 0.476
+ },
+ {
+  "id": "abo-B075QFCHM9",
+  "name": "York Modern Upholstered Platform Bed, Queen",
+  "brand": "Rivet",
+  "source": "Amazon Berkeley Objects",
+  "category": "Beds",
+  "build": "bed",
+  "file": "abo/B075QFCHM9.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B075QFCHM9",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "fabric",
+  "colors": [
+   {
+    "name": "Grey",
+    "hex": "#8c8d8f"
+   }
+  ],
+  "style": [
+   "modern"
+  ],
+  "w": 1.84,
+  "d": 2.368,
+  "h": 1.067
+ },
+ {
+  "id": "abo-B07B4SCB6T",
+  "name": "Upholstered Queen Bed with Tall Headboard",
+  "brand": "Rivet",
+  "source": "Amazon Berkeley Objects",
+  "category": "Beds",
+  "build": "bed",
+  "file": "abo/B07B4SCB6T.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B07B4SCB6T",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "fabric",
+  "colors": [
+   {
+    "name": "Light grey",
+    "hex": "#a9a7a3"
+   }
+  ],
+  "style": [
+   "modern",
+   "transitional"
+  ],
+  "w": 1.713,
+  "d": 2.372,
+  "h": 1.443
+ },
+ {
+  "id": "abo-B075Z8GZ9X",
+  "name": "Bateman Rustic Wood Nightstand",
+  "brand": "Stone & Beam",
+  "source": "Amazon Berkeley Objects",
+  "category": "Nightstands",
+  "build": "nightstand",
+  "file": "abo/B075Z8GZ9X.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B075Z8GZ9X",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "wood",
+  "colors": [
+   {
+    "name": "Natural wood",
+    "hex": "#9a7148"
+   }
+  ],
+  "style": [
+   "rustic",
+   "farmhouse"
+  ],
+  "w": 0.61,
+  "d": 0.446,
+  "h": 0.61
+ },
+ {
+  "id": "abo-B075YZ16V7",
+  "name": "Mid-Century Stark 6-Drawer Dresser, 61\"",
+  "brand": "Rivet",
+  "source": "Amazon Berkeley Objects",
+  "category": "Dressers",
+  "build": "dresser",
+  "file": "abo/B075YZ16V7.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B075YZ16V7",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "wood",
+  "colors": [
+   {
+    "name": "Espresso",
+    "hex": "#3f2c22"
+   }
+  ],
+  "style": [
+   "mid-century"
+  ],
+  "w": 1.536,
+  "d": 0.464,
+  "h": 0.81
+ },
+ {
+  "id": "abo-B075ZF4S39",
+  "name": "Barrett 4-Shelf Bookcase, 40\"",
+  "brand": "Stone & Beam",
+  "source": "Amazon Berkeley Objects",
+  "category": "Bookcases & shelving",
+  "build": "bookshelf",
+  "file": "abo/B075ZF4S39.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B075ZF4S39",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "wood",
+  "colors": [
+   {
+    "name": "White / pine",
+    "hex": "#e2ddd3"
+   }
+  ],
+  "style": [
+   "farmhouse",
+   "casual"
+  ],
+  "w": 1.022,
+  "d": 0.381,
+  "h": 1.878
+ },
+ {
+  "id": "abo-B07B7J5BC2",
+  "name": "Alan Wood Media Console, 62\"",
+  "brand": "Stone & Beam",
+  "source": "Amazon Berkeley Objects",
+  "category": "Media consoles",
+  "build": "tv_console",
+  "file": "abo/B07B7J5BC2.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B07B7J5BC2",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "wood",
+  "colors": [
+   {
+    "name": "Navy / gold",
+    "hex": "#2c3a52"
+   }
+  ],
+  "style": [
+   "modern",
+   "glam"
+  ],
+  "w": 1.575,
+  "d": 0.479,
+  "h": 0.719
+ },
+ {
+  "id": "abo-B07B7DL3GX",
+  "name": "Casual Wood Computer Desk, 60\"",
+  "brand": "Stone & Beam",
+  "source": "Amazon Berkeley Objects",
+  "category": "Desks",
+  "build": "desk",
+  "file": "abo/B07B7DL3GX.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B07B7DL3GX",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "wood",
+  "colors": [
+   {
+    "name": "Birch",
+    "hex": "#c9a77c"
+   }
+  ],
+  "style": [
+   "casual",
+   "scandinavian"
+  ],
+  "w": 1.499,
+  "d": 0.813,
+  "h": 0.762
+ },
+ {
+  "id": "abo-B075Z8769G",
+  "name": "Swope Mid-Century Swivel Office Chair",
+  "brand": "Rivet",
+  "source": "Amazon Berkeley Objects",
+  "category": "Desk chairs",
+  "build": "office_chair",
+  "file": "abo/B075Z8769G.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B075Z8769G",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "fabric",
+  "colors": [
+   {
+    "name": "Felt grey",
+    "hex": "#8a8d90"
+   }
+  ],
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "w": 0.642,
+  "d": 0.677,
+  "h": 0.874
+ },
+ {
+  "id": "abo-B07HK85S41",
+  "name": "Mid-Century Standing Floor Lamp",
+  "brand": "Rivet",
+  "source": "Amazon Berkeley Objects",
+  "category": "Lighting",
+  "build": "floor_lamp",
+  "file": "abo/B07HK85S41.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B07HK85S41",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "metal",
+  "colors": [
+   {
+    "name": "White shade",
+    "hex": "#ece6da"
+   }
+  ],
+  "style": [
+   "mid-century"
+  ],
+  "w": 0.381,
+  "d": 0.381,
+  "h": 1.48
+ },
+ {
+  "id": "abo-B0725Z9MX3",
+  "name": "Speckle Wool Area Rug, 5 \u00d7 7.5 ft",
+  "brand": "Stone & Beam",
+  "source": "Amazon Berkeley Objects",
+  "category": "Rugs",
+  "build": "rug",
+  "file": "abo/B0725Z9MX3.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B0725Z9MX3",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "fabric",
+  "colors": [
+   {
+    "name": "Ivory / charcoal",
+    "hex": "#d9d2c5"
+   }
+  ],
+  "style": [
+   "casual",
+   "modern"
+  ],
+  "w": 2.283,
+  "d": 1.547,
+  "h": 0.013
+ },
+ {
+  "id": "abo-B07B4WKMB1",
+  "name": "Striated Jute Area Rug",
+  "brand": "Rivet",
+  "source": "Amazon Berkeley Objects",
+  "category": "Rugs",
+  "build": "rug",
+  "file": "abo/B07B4WKMB1.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B07B4WKMB1",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "rattan",
+  "colors": [
+   {
+    "name": "Oatmeal jute",
+    "hex": "#c2a878"
+   }
+  ],
+  "style": [
+   "organic modern",
+   "coastal"
+  ],
+  "w": 1.792,
+  "d": 1.154,
+  "h": 0.021
+ },
+ {
+  "id": "abo-B075YMN1VY",
+  "name": "Burke Wood Counter-Height Bar Stool",
+  "brand": "Stone & Beam",
+  "source": "Amazon Berkeley Objects",
+  "category": "Bar stools",
+  "build": "bar_stool",
+  "file": "abo/B075YMN1VY.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B075YMN1VY",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "wood",
+  "colors": [
+   {
+    "name": "Slate grey",
+    "hex": "#6f7070"
+   }
+  ],
+  "style": [
+   "farmhouse",
+   "industrial"
+  ],
+  "w": 0.512,
+  "d": 0.531,
+  "h": 1.009
+ },
+ {
+  "id": "abo-B073G7BVBP",
+  "name": "Martin Modern Velvet Storage Bench, 39\"",
+  "brand": "Rivet",
+  "source": "Amazon Berkeley Objects",
+  "category": "Benches",
+  "build": "bench",
+  "file": "abo/B073G7BVBP.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B073G7BVBP",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "velvet",
+  "colors": [
+   {
+    "name": "Velvet",
+    "hex": "#5d6e74"
+   }
+  ],
+  "style": [
+   "modern",
+   "glam"
+  ],
+  "w": 1.016,
+  "d": 0.492,
+  "h": 0.471
+ },
+ {
+  "id": "abo-B07HSJY7CY",
+  "name": "Rustic Buffet Cabinet",
+  "brand": "Stone & Beam",
+  "source": "Amazon Berkeley Objects",
+  "category": "Sideboards",
+  "build": "sideboard",
+  "file": "abo/B07HSJY7CY.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B07HSJY7CY",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "wood",
+  "colors": [
+   {
+    "name": "Carbon wood",
+    "hex": "#3a3633"
+   }
+  ],
+  "style": [
+   "rustic",
+   "industrial"
+  ],
+  "w": 0.968,
+  "d": 0.338,
+  "h": 0.919
+ },
+ {
+  "id": "abo-B075X4YDJT",
+  "name": "Modern Cube Pouf",
+  "brand": "Rivet",
+  "source": "Amazon Berkeley Objects",
+  "category": "Ottomans & poufs",
+  "build": "pouf",
+  "file": "abo/B075X4YDJT.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "Amazon Berkeley Objects \u00b7 3D model \u00a9 Amazon.com \u00b7 CC BY 4.0",
+  "url": "https://www.amazon.com/dp/B075X4YDJT",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "fabric",
+  "colors": [
+   {
+    "name": "Natural",
+    "hex": "#cfc5b4"
+   }
+  ],
+  "style": [
+   "modern",
+   "boho"
+  ],
+  "w": 0.512,
+  "d": 0.505,
+  "h": 0.441
+ },
+ {
+  "id": "kh-glamvelvetsofa",
+  "name": "Glam Velvet Sofa, 86\"",
+  "brand": "Wayfair (Khronos sample)",
+  "source": "Khronos glTF Sample Assets",
+  "category": "Sofas",
+  "build": "sofa",
+  "file": "khronos/GlamVelvetSofa.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "\u00a9 Wayfair, LLC \u2013 Eric Chadwick, CC BY 4.0",
+  "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/GlamVelvetSofa",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "velvet",
+  "colors": [
+   {
+    "name": "Velvet",
+    "hex": "#6f7c72"
+   }
+  ],
+  "style": [
+   "glam",
+   "modern"
+  ],
+  "w": 2.188,
+  "d": 1.023,
+  "h": 0.788
+ },
+ {
+  "id": "kh-sheenchair",
+  "name": "Tufted Velvet Accent Chair",
+  "brand": "Wayfair (Khronos sample)",
+  "source": "Khronos glTF Sample Assets",
+  "category": "Chairs",
+  "build": "armchair",
+  "file": "khronos/SheenChair.glb",
+  "license": "CC0",
+  "attribution": "Wayfair / Eric Chadwick, CC0",
+  "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenChair",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "velvet",
+  "colors": [
+   {
+    "name": "Mango velvet",
+    "hex": "#d29a3c"
+   }
+  ],
+  "style": [
+   "glam",
+   "traditional"
+  ],
+  "w": 0.827,
+  "d": 0.57,
+  "h": 0.686
+ },
+ {
+  "id": "kh-chairdamaskpurplegold",
+  "name": "Damask Accent Chair",
+  "brand": "Wayfair (Khronos sample)",
+  "source": "Khronos glTF Sample Assets",
+  "category": "Chairs",
+  "build": "armchair",
+  "file": "khronos/ChairDamaskPurplegold.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "\u00a9 Wayfair, LLC \u2013 Eric Chadwick, CC BY 4.0",
+  "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/ChairDamaskPurplegold",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "fabric",
+  "colors": [
+   {
+    "name": "Purple / gold",
+    "hex": "#6b4a6e"
+   }
+  ],
+  "style": [
+   "traditional",
+   "glam"
+  ],
+  "w": 0.829,
+  "d": 0.572,
+  "h": 0.687
+ },
+ {
+  "id": "kh-specularsilkpouf",
+  "name": "Silk Pouf",
+  "brand": "Wayfair (Khronos sample)",
+  "source": "Khronos glTF Sample Assets",
+  "category": "Ottomans & poufs",
+  "build": "pouf",
+  "file": "khronos/SpecularSilkPouf.glb",
+  "license": "CC-BY-4.0",
+  "attribution": "\u00a9 Wayfair, LLC \u2013 Eric Chadwick, CC BY 4.0",
+  "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SpecularSilkPouf",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "fabric",
+  "colors": [
+   {
+    "name": "Silk",
+    "hex": "#b9a58c"
+   }
+  ],
+  "style": [
+   "glam",
+   "boho"
+  ],
+  "w": 0.61,
+  "d": 0.61,
+  "h": 0.198
+ },
+ {
+  "id": "ph-modern_arm_chair_01",
+  "name": "Modern Arm Chair (oak and leather)",
+  "brand": "Poly Haven",
+  "source": "Poly Haven",
+  "category": "Chairs",
+  "build": "armchair",
+  "file": "polyhaven/modern_arm_chair_01/modern_arm_chair_01_1k.gltf",
+  "license": "CC0",
+  "attribution": "Poly Haven, CC0",
+  "url": "https://polyhaven.com/a/modern_arm_chair_01",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "leather",
+  "colors": [
+   {
+    "name": "Black leather / oak",
+    "hex": "#3b302a"
+   }
+  ],
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "w": 0.82,
+  "d": 0.987,
+  "h": 1.023
+ },
+ {
+  "id": "ph-dining_chair_02",
+  "name": "Tufted Leather Dining Chair",
+  "brand": "Poly Haven",
+  "source": "Poly Haven",
+  "category": "Dining chairs",
+  "build": "dining_chair",
+  "file": "polyhaven/dining_chair_02/dining_chair_02_1k.gltf",
+  "license": "CC0",
+  "attribution": "Poly Haven, CC0",
+  "url": "https://polyhaven.com/a/dining_chair_02",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "leather",
+  "colors": [
+   {
+    "name": "Brown leather",
+    "hex": "#6b4a33"
+   }
+  ],
+  "style": [
+   "modern",
+   "traditional"
+  ],
+  "w": 0.434,
+  "d": 0.576,
+  "h": 0.973
+ },
+ {
+  "id": "ph-coffee_table_round_01",
+  "name": "Round Marble Coffee Table",
+  "brand": "Poly Haven",
+  "source": "Poly Haven",
+  "category": "Coffee tables",
+  "build": "round_coffee_table",
+  "file": "polyhaven/coffee_table_round_01/coffee_table_round_01_1k.gltf",
+  "license": "CC0",
+  "attribution": "Poly Haven, CC0",
+  "url": "https://polyhaven.com/a/coffee_table_round_01",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "marble",
+  "colors": [
+   {
+    "name": "White marble",
+    "hex": "#e7e3dc"
+   }
+  ],
+  "style": [
+   "modern",
+   "glam"
+  ],
+  "w": 1.301,
+  "d": 1.301,
+  "h": 0.491
+ },
+ {
+  "id": "ph-modern_coffee_table_01",
+  "name": "Stone-Top Coffee Table",
+  "brand": "Poly Haven",
+  "source": "Poly Haven",
+  "category": "Coffee tables",
+  "build": "coffee_table",
+  "file": "polyhaven/modern_coffee_table_01/modern_coffee_table_01_1k.gltf",
+  "license": "CC0",
+  "attribution": "Poly Haven, CC0",
+  "url": "https://polyhaven.com/a/modern_coffee_table_01",
+  "front": "+x",
+  "fit": "stretch",
+  "material": "marble",
+  "colors": [
+   {
+    "name": "Stone / wood",
+    "hex": "#b8afa2"
+   }
+  ],
+  "style": [
+   "modern",
+   "organic modern"
+  ],
+  "w": 1.202,
+  "d": 0.6,
+  "h": 0.39
+ },
+ {
+  "id": "ph-side_table_01",
+  "name": "Minimalist Oak Side Table",
+  "brand": "Poly Haven",
+  "source": "Poly Haven",
+  "category": "Side tables",
+  "build": "side_table",
+  "file": "polyhaven/side_table_01/side_table_01_1k.gltf",
+  "license": "CC0",
+  "attribution": "Poly Haven, CC0",
+  "url": "https://polyhaven.com/a/side_table_01",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "wood",
+  "colors": [
+   {
+    "name": "Oak",
+    "hex": "#b48a5e"
+   }
+  ],
+  "style": [
+   "scandinavian",
+   "minimalist"
+  ],
+  "w": 0.55,
+  "d": 0.45,
+  "h": 0.551
+ },
+ {
+  "id": "ph-drawer_cabinet",
+  "name": "Wood and Steel Drawer Cabinet",
+  "brand": "Poly Haven",
+  "source": "Poly Haven",
+  "category": "Dressers",
+  "build": "dresser",
+  "file": "polyhaven/drawer_cabinet/drawer_cabinet_1k.gltf",
+  "license": "CC0",
+  "attribution": "Poly Haven, CC0",
+  "url": "https://polyhaven.com/a/drawer_cabinet",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "wood",
+  "colors": [
+   {
+    "name": "Wood / black steel",
+    "hex": "#6f5139"
+   }
+  ],
+  "style": [
+   "industrial",
+   "modern"
+  ],
+  "w": 1.141,
+  "d": 0.488,
+  "h": 1.881
+ },
+ {
+  "id": "ph-wooden_display_shelves_01",
+  "name": "9-Cube Pine Display Shelves",
+  "brand": "Poly Haven",
+  "source": "Poly Haven",
+  "category": "Bookcases & shelving",
+  "build": "bookshelf",
+  "file": "polyhaven/wooden_display_shelves_01/wooden_display_shelves_01_1k.gltf",
+  "license": "CC0",
+  "attribution": "Poly Haven, CC0",
+  "url": "https://polyhaven.com/a/wooden_display_shelves_01",
+  "front": "+x",
+  "fit": "stretch",
+  "material": "wood",
+  "colors": [
+   {
+    "name": "Pine",
+    "hex": "#c8a272"
+   }
+  ],
+  "style": [
+   "scandinavian",
+   "casual"
+  ],
+  "w": 1.078,
+  "d": 0.372,
+  "h": 1.556
+ },
+ {
+  "id": "ph-steel_frame_shelves_01",
+  "name": "Steel-Frame Shelving",
+  "brand": "Poly Haven",
+  "source": "Poly Haven",
+  "category": "Bookcases & shelving",
+  "build": "bookshelf",
+  "file": "polyhaven/steel_frame_shelves_01/steel_frame_shelves_01_1k.gltf",
+  "license": "CC0",
+  "attribution": "Poly Haven, CC0",
+  "url": "https://polyhaven.com/a/steel_frame_shelves_01",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "metal",
+  "colors": [
+   {
+    "name": "Steel / wood",
+    "hex": "#5b5d5f"
+   }
+  ],
+  "style": [
+   "industrial"
+  ],
+  "w": 1.1,
+  "d": 0.5,
+  "h": 2.14
+ },
+ {
+  "id": "ph-modern_wooden_cabinet",
+  "name": "Slatted Wood Media Cabinet",
+  "brand": "Poly Haven",
+  "source": "Poly Haven",
+  "category": "Media consoles",
+  "build": "tv_console",
+  "file": "polyhaven/modern_wooden_cabinet/modern_wooden_cabinet_1k.gltf",
+  "license": "CC0",
+  "attribution": "Poly Haven, CC0",
+  "url": "https://polyhaven.com/a/modern_wooden_cabinet",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "wood",
+  "colors": [
+   {
+    "name": "Oak slats",
+    "hex": "#a8865f"
+   }
+  ],
+  "style": [
+   "japandi",
+   "mid-century",
+   "organic modern"
+  ],
+  "w": 2.44,
+  "d": 0.52,
+  "h": 0.68
+ },
+ {
+  "id": "ph-potted_plant_01",
+  "name": "Tall Potted Plant (terracotta)",
+  "brand": "Poly Haven",
+  "source": "Poly Haven",
+  "category": "Plants",
+  "build": "tall_plant",
+  "file": "polyhaven/potted_plant_01/potted_plant_01_1k.gltf",
+  "license": "CC0",
+  "attribution": "Poly Haven, CC0",
+  "url": "https://polyhaven.com/a/potted_plant_01",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "fabric",
+  "colors": [
+   {
+    "name": "Green",
+    "hex": "#4f7a46"
+   }
+  ],
+  "style": [
+   "organic modern",
+   "boho"
+  ],
+  "w": 0.587,
+  "d": 0.634,
+  "h": 1.35
+ },
+ {
+  "id": "ph-potted_plant_02",
+  "name": "Potted Plant (medium)",
+  "brand": "Poly Haven",
+  "source": "Poly Haven",
+  "category": "Plants",
+  "build": "plant",
+  "file": "polyhaven/potted_plant_02/potted_plant_02_1k.gltf",
+  "license": "CC0",
+  "attribution": "Poly Haven, CC0",
+  "url": "https://polyhaven.com/a/potted_plant_02",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "fabric",
+  "colors": [
+   {
+    "name": "Green",
+    "hex": "#4f7a46"
+   }
+  ],
+  "style": [
+   "organic modern",
+   "scandinavian"
+  ],
+  "w": 0.701,
+  "d": 0.657,
+  "h": 0.841
+ },
+ {
+  "id": "ph-sofa_02",
+  "name": "Vintage Sofa",
+  "brand": "Poly Haven",
+  "source": "Poly Haven",
+  "category": "Sofas",
+  "build": "sofa",
+  "file": "polyhaven/sofa_02/sofa_02_1k.gltf",
+  "license": "CC0",
+  "attribution": "Poly Haven, CC0",
+  "url": "https://polyhaven.com/a/sofa_02",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "fabric",
+  "colors": [
+   {
+    "name": "Worn fabric",
+    "hex": "#8d7f6e"
+   }
+  ],
+  "style": [
+   "vintage",
+   "traditional"
+  ],
+  "w": 1.807,
+  "d": 0.818,
+  "h": 0.709
+ },
+ {
+  "id": "ph-ottoman_01",
+  "name": "Leather Ottoman",
+  "brand": "Poly Haven",
+  "source": "Poly Haven",
+  "category": "Ottomans & poufs",
+  "build": "ottoman",
+  "file": "polyhaven/Ottoman_01/Ottoman_01_1k.gltf",
+  "license": "CC0",
+  "attribution": "Poly Haven, CC0",
+  "url": "https://polyhaven.com/a/Ottoman_01",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "leather",
+  "colors": [
+   {
+    "name": "Leather",
+    "hex": "#6e4b35"
+   }
+  ],
+  "style": [
+   "traditional",
+   "vintage"
+  ],
+  "w": 0.885,
+  "d": 0.621,
+  "h": 0.624
+ },
+ {
+  "id": "ph-metal_office_desk",
+  "name": "Steel Office Desk",
+  "brand": "Poly Haven",
+  "source": "Poly Haven",
+  "category": "Desks",
+  "build": "desk",
+  "file": "polyhaven/metal_office_desk/metal_office_desk_1k.gltf",
+  "license": "CC0",
+  "attribution": "Poly Haven, CC0",
+  "url": "https://polyhaven.com/a/metal_office_desk",
+  "front": "+z",
+  "fit": "stretch",
+  "material": "metal",
+  "colors": [
+   {
+    "name": "Steel grey",
+    "hex": "#7c8184"
+   }
+  ],
+  "style": [
+   "industrial",
+   "vintage"
+  ],
+  "w": 2.0,
+  "d": 0.947,
+  "h": 0.788
+ }
+]

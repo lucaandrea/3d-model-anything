@@ -180,6 +180,23 @@ struct ScanBundle {
       try copy(frame.confidence)
       if let rgb = frame.rgb { try copy(rgb) }
     }
+    // Keep provisional marker evidence with AirDrop exports, scoped to this room.
+    if fm.fileExists(atPath: file(GuidedCaptureContext.filename).path) {
+      try copy(GuidedCaptureContext.filename)
+    }
+    // Between-room observations have no roomIndex and remain in the full session.
+    let markerPath = "marker-observations.json"
+    if fm.fileExists(atPath: file(markerPath).path) {
+      let source = try checkedSource(markerPath)
+      guard (try source.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0) <= 10 * 1024 * 1024,
+            var envelope = try JSONSerialization.jsonObject(with: Data(contentsOf: source)) as? [String: Any],
+            envelope["format"] as? String == "marker-observations/1",
+            let observations = envelope["observations"] as? [[String: Any]], observations.count <= 600 else {
+        throw CocoaError(.fileReadCorruptFile)
+      }
+      envelope["observations"] = observations.filter { $0["roomIndex"] as? Int == index }
+      try JSONSerialization.data(withJSONObject: envelope, options: [.sortedKeys]).write(to: output.file(markerPath), options: .atomic)
+    }
     try output.savePhotos(selectedPhotos)
     try encoder.encode(selectedDepth).write(to: output.file("depth/frames.json"))
     room.name = name
@@ -302,6 +319,7 @@ struct Diagnostics: Codable {
   var relocalization: Relocalization?
   /// periodic live-mesh ↔ saved-mesh checks after relocalizing (capped)
   var alignmentChecks: [AlignmentCheck]?
+  var alignmentInvalidated: Bool?
 
   /// Structured framework errors, including the underlying NSError chain.
   var failures: [Failure]?
@@ -388,6 +406,15 @@ struct RoomRecord: Codable, Identifiable {
   var windows: Int
   var openings: Int
   var objects: Int
+  /// Failed RoomPlan captures can return empty JSON/USDZ successfully. Paths and
+  /// names alone do not establish measured geometry or complete a route step.
+  var hasRoomPlanGeometry: Bool { walls > 0 || doors > 0 || windows > 0 || openings > 0 || objects > 0 }
+  var hasMeasuredGeometry: Bool {
+    hasRoomPlanGeometry || (mesh.map { $0.vertices > 0 && $0.faces > 0 } ?? false)
+  }
+  /// A detail pass may preserve photographs even if RoomPlan finds no new layout.
+  /// This must never substitute for `hasMeasuredGeometry` in structural review.
+  var hasDetailEvidence: Bool { hasMeasuredGeometry || (detailPhotos ?? 0) > 0 }
   /// detail pass results
   var mesh: MeshRecord?
   /// fraction of the in-room mesh area that's well photographed
@@ -417,6 +444,11 @@ struct MeshRecord: Codable {
 /// orientation (landscape); `intrinsics` match those pixels. It carries EXIF
 /// orientation 6 so viewers show it upright; ignore that when projecting.
 struct PhotoRecord: Codable {
+  /// Optional object-detail evidence. Legacy readers ignore these additive fields.
+  var objectID: String? = nil
+  var objectName: String? = nil
+  var referenceView: String? = nil
+  var cleanReferenceReported: Bool? = nil
   var file: String
   /// index of the room being scanned when this was taken
   var room: Int

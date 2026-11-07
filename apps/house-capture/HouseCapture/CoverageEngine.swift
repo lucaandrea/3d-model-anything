@@ -129,6 +129,7 @@ final class CoverageEngine: @unchecked Sendable {
   private var floorY: Float = -10
   private var ceilingY: Float = 10
   private var statsScheduled = false
+  private var hasReviewedScope = false
   private var ceilingFraction: Float = 1
 
   static let goodScore: Float = 0.8 // a vertex is "done" (green) at this score: one clean photo within ~3 m
@@ -136,7 +137,13 @@ final class CoverageEngine: @unchecked Sendable {
   // MARK: inputs
 
   /// Room outline (world x/z) + vertical range, and RoomPlan surface samples
+  func setReviewedScope(targets: [Target], outline: [SIMD2<Float>], floor: Float, ceiling: Float) {
+    lock.withLock { hasReviewedScope = true }
+    if pendingRooms.offer(0, (targets, outline, floor, ceiling)) { queue.async { self.applyPendingRoom() } }
+  }
+
   func setRoom(_ room: CapturedRoom?) {
+    guard !lock.withLock({ hasReviewedScope }) else { return }
     let targets = room.map(Self.targets(for:)) ?? []
     let (outline, floor, ceiling) = room.map(Self.bounds(for:)) ?? ([], -10, 10)
     if pendingRooms.offer(0, (targets, outline, floor, ceiling)) {
@@ -199,6 +206,16 @@ final class CoverageEngine: @unchecked Sendable {
       self.scoreTargets()
       self.emit(changed)
       self.publishStats()
+    }
+  }
+
+  /// Called only after the final export barrier; no accepted data is discarded.
+  func releaseResources() {
+    onMeshes = nil; onStats = nil
+    queue.async {
+      self.anchors.removeAll(); self.photos.removeAll()
+      self.targets.removeAll(); self.targetScore.removeAll(); self.outline.removeAll()
+      self.lock.withLock { self.pendingView = nil }
     }
   }
 

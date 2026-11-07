@@ -177,6 +177,27 @@ for (let c = Math.ceil(vMin * 4) / 4; c <= vMax; c += 0.25) {
   if (half) { ctx.fillStyle = '#ff0'; ctx.fillText(`${vAxis}${c.toFixed(1)}`, 2, y - 2); }
 }
 if (params.has('nogrid') || persp || photo) grid.style.display = 'none';
+// Optional comparison keeps the exact photo framing, including empty scan regions.
+if (photo && params.has('compare')) {
+  document.body.style.cssText = 'margin:20px;background:#17201b;color:#e3e8e5;font:14px system-ui';
+  const heading = document.createElement('h1');
+  heading.textContent = `Photo ${params.get('photo')} · ${src === 'scan' ? 'LiDAR scan' : 'Measured model'} comparison`;
+  heading.style.fontSize = '20px';
+  const comparison = document.createElement('div');
+  comparison.style.cssText = 'display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap';
+  const original = document.createElement('figure'), rendered = document.createElement('figure');
+  original.style.margin = rendered.style.margin = '0';
+  const image = document.createElement('img');
+  image.src = photo.url; image.width = W; image.height = H;
+  image.alt = `Original capture photo ${params.get('photo')}`;
+  const originalLabel = document.createElement('figcaption'); originalLabel.textContent = 'Original photo';
+  const renderedLabel = document.createElement('figcaption'); renderedLabel.textContent = 'Same camera position and field of view';
+  original.append(originalLabel, image);
+  rendered.append(renderedLabel, document.querySelector('#wrap')!);
+  comparison.append(original, rendered);
+  document.body.append(heading, comparison);
+  await image.decode();
+}
 if (import.meta.env.DEV) Object.assign(window, { __cap: { renderer, scene, room, camera,
   renderPhoto(index: number) {
     const p = room.photos?.[index];

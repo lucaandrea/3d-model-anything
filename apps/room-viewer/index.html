@@ -2,18 +2,19 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" href="data:," />
     <title>3D Model Anything</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
-  <body>
+  <body class="scan-home-mode">
     <header class="viewer-topbar">
       <a class="brand" href="/" aria-label="3D Model Anything home"><span class="brand-mark" aria-hidden="true">⌂</span> 3D Model Anything</a>
-      <output id="viewer-status" aria-live="polite">Loading room…</output>
-      <button id="controls-toggle" aria-expanded="false" aria-controls="sidebar">Controls</button>
+      <output id="viewer-status" aria-live="polite">No scan loaded</output>
+      <a id="review-link" class="review-link" href="/review.html" target="loft-review">Screenshots & notes</a>
+      <button id="controls-toggle" hidden aria-expanded="false" aria-controls="sidebar">Controls</button>
     </header>
-    <aside id="sidebar" aria-label="Room controls">
+    <aside id="sidebar" hidden aria-label="Room controls">
       <div id="hud" hidden>
         <section class="control-section">
           <h2>Rooms <span class="section-note">Explore your space</span></h2>
@@ -62,19 +63,34 @@
         </section>
         <div class="sidebar-footer">
           <button class="play-link" title="Walk around and grab / throw things (physics)">Enter playground <span aria-hidden="true">↗</span></button>
-          <p class="help" data-for="orbit">Drag to orbit · Scroll to zoom<br>Right-drag / two fingers to pan<br>Double-click to focus</p>
+          <p class="help" data-for="orbit">One finger to orbit · Pinch to zoom<br>Two fingers to pan<br>Double-tap to focus</p>
           <p class="help" data-for="layout" hidden>Drag to pan · Scroll to zoom<br>Double-click to fit</p>
           <p class="help" data-for="walk" hidden>Mouse to look · WASD to move<br>Shift to run · Esc to exit</p>
         </div>
       </div>
     </aside>
-    <main id="viewport" aria-label="Room viewer">
+    <main id="viewport" hidden aria-label="Room viewer">
       <canvas id="scene"></canvas>
       <section id="layout" hidden aria-label="Overhead room layout"></section>
       <section id="knolling" hidden aria-label="Knolling arrangement"></section>
 
       <div id="loader"><div class="bar"><div class="fill"></div></div><p>Loading… <span class="pct"></span></p></div>
     </main>
-    <script type="module" src="/src/main.ts"></script>
+    <main id="scan-home" aria-labelledby="scan-heading">
+      <div class="scan-intro">
+        <span class="scan-eyebrow">Your home, in 3D</span>
+        <h1 id="scan-heading">Start with your first room.</h1>
+        <p class="scan-lead">This space is clear and ready for your home. Capture a room on your iPhone, then bring the finished scan to this Mac.</p>
+      </div>
+      <ol class="scan-steps">
+        <li><span class="scan-step-number" aria-hidden="true">01</span><div><h2>Scan on iPhone</h2><p>Open 3D Model Anything, create a house, and scan one room. Tap <strong>Finish room</strong> when you’re done.</p></div></li>
+        <li><span class="scan-step-number" aria-hidden="true">02</span><div><h2>AirDrop to this Mac</h2><p>In the saved room, tap <strong>Share room (.zip)</strong> and choose AirDrop. Keep the original ZIP as your capture backup.</p></div></li>
+        <li><span class="scan-step-number" aria-hidden="true">03</span><div><h2>Build your model</h2><p>Tell Codex where the ZIP was saved and ask it to use <strong>scan-to-threejs</strong>. Your model can then open in this viewer.</p></div></li>
+      </ol>
+      <p class="scan-transfer-note">The current iPhone app shares completed scans. Live streaming to Safari is not available in this version.</p>
+      <details class="scan-existing"><summary>Existing rooms &amp; demos</summary><nav id="available-rooms" aria-label="Existing rooms and demos"></nav></details>
+      <noscript>Enable JavaScript to open a room in the viewer.</noscript>
+    </main>
+    <script type="module" src="/src/entry.ts"></script>
   </body>
 </html>

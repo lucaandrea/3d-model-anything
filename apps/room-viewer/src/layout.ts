@@ -26,7 +26,9 @@ export function showLayout(host: HTMLElement, room: RoomLayout, name: string) {
   const fit = document.createElement('button'); fit.textContent = room.rooms ? 'Fit house' : 'Fit room';
   header.append(title, subtitle, note, fit); host.append(header);
   const svg = el('svg', { role: 'img', 'aria-label': `${name} floor plan with walls, openings and furniture` });
-  host.append(svg);
+  const plan = document.createElement('div');
+  plan.className = 'layout-plan';
+  plan.append(svg); host.append(plan);
   const initial = [minX - .75, minZ - .65, width + 1.5, height + 1.3];
   let box = [...initial];
   const apply = () => svg.setAttribute('viewBox', box.join(' '));

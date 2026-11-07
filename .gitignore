@@ -1,4 +1,5 @@
 node_modules/
+.venv/
 dist/
 build/
 DerivedData/
@@ -12,6 +13,11 @@ data/captures-in/
 data/captures/
 data/recordings/
 data/scans/
+data/reviews/
+dist-review/
 apps/house-capture/release/screenshots/
 
 HouseCapture.xcodeproj/
+output/
+tmp/
+.build/

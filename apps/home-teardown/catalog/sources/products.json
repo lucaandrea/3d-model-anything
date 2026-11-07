@@ -1,0 +1,2870 @@
+[
+ {
+  "retailer": "IKEA",
+  "name": "KALLAX shelf unit, white, 30 1/8x30 1/8\"",
+  "category": "bookcase",
+  "url": "https://www.ikea.com/us/en/p/kallax-shelf-unit-white-20631639/",
+  "w_cm": 76.5,
+  "d_cm": 39.1,
+  "h_cm": 76.5,
+  "seat_h_cm": null,
+  "w_in": 30.125,
+  "d_in": 15.375,
+  "h_in": 30.125,
+  "seat_h_in": null,
+  "materials": [
+   "particleboard",
+   "fiberboard",
+   "honeycomb paper filling"
+  ],
+  "colors": [
+   {
+    "name": "white",
+    "hex": "#F5F5F2"
+   },
+   {
+    "name": "black-brown",
+    "hex": "#3B2F2A"
+   },
+   {
+    "name": "white stained oak effect",
+    "hex": "#D9CBB5"
+   }
+  ],
+  "price_usd": 49.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "scandinavian",
+   "minimalist",
+   "modern"
+  ],
+  "dims_source": "official product page (read once before the terms were checked)",
+  "note": "2x2 cube unit."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "BILLY bookcase, white, 31 1/2x11x79 1/2\"",
+  "category": "bookcase",
+  "url": "https://www.ikea.com/us/en/p/billy-bookcase-white-20522046/",
+  "w_cm": 80.0,
+  "d_cm": 27.9,
+  "h_cm": 201.9,
+  "seat_h_cm": null,
+  "w_in": 31.5,
+  "d_in": 11.0,
+  "h_in": 79.5,
+  "seat_h_in": null,
+  "materials": [
+   "particleboard",
+   "fiberboard",
+   "paper foil"
+  ],
+  "colors": [
+   {
+    "name": "white",
+    "hex": "#F5F5F2"
+   },
+   {
+    "name": "oak effect",
+    "hex": "#C8A57A"
+   }
+  ],
+  "price_usd": 79.0,
+  "price_seen": "2026-10-31",
+  "style": [
+   "scandinavian",
+   "minimalist"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Metric 80x28x202 cm agrees."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "HEMNES 8-drawer dresser, white stain, 63x37 3/4\"",
+  "category": "dresser",
+  "url": "https://www.ikea.com/us/en/p/hemnes-8-drawer-dresser-white-stain-10576191/",
+  "w_cm": 160.0,
+  "d_cm": 49.8,
+  "h_cm": 95.9,
+  "seat_h_cm": null,
+  "w_in": 63.0,
+  "d_in": 19.625,
+  "h_in": 37.75,
+  "seat_h_in": null,
+  "materials": [
+   "solid pine",
+   "fiberboard",
+   "particleboard"
+  ],
+  "colors": [
+   {
+    "name": "white stain",
+    "hex": "#E9E4DA"
+   },
+   {
+    "name": "black-brown",
+    "hex": "#3B2F2A"
+   }
+  ],
+  "price_usd": 449.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "traditional",
+   "scandinavian",
+   "farmhouse"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Metric 160x50x96 cm agrees. An older page shows $279 for black-brown; check the price."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "HEMNES Nightstand, white stain, 18 1/8x13 3/4\"",
+  "category": "nightstand",
+  "url": "https://www.ikea.com/us/en/p/hemnes-nightstand-white-stain-20200456/",
+  "w_cm": 46.0,
+  "d_cm": 34.9,
+  "h_cm": 69.8,
+  "seat_h_cm": null,
+  "w_in": 18.125,
+  "d_in": 13.75,
+  "h_in": 27.5,
+  "seat_h_in": null,
+  "materials": [
+   "solid pine",
+   "fiberboard"
+  ],
+  "colors": [
+   {
+    "name": "white stain",
+    "hex": "#E9E4DA"
+   },
+   {
+    "name": "black-brown",
+    "hex": "#3B2F2A"
+   },
+   {
+    "name": "gray dark gray stained",
+    "hex": "#5B5A57"
+   }
+  ],
+  "price_usd": 129.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "traditional",
+   "scandinavian",
+   "farmhouse"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Price conflict: an older page shows $69.99."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "LACK coffee table, white, 35 3/8x21 5/8\"",
+  "category": "coffee_table",
+  "url": "https://www.ikea.com/us/en/p/lack-coffee-table-white-90449905/",
+  "w_cm": 89.9,
+  "d_cm": 54.9,
+  "h_cm": 45.1,
+  "seat_h_cm": null,
+  "w_in": 35.375,
+  "d_in": 21.625,
+  "h_in": 17.75,
+  "seat_h_in": null,
+  "materials": [
+   "particleboard",
+   "fiberboard",
+   "honeycomb paper filling"
+  ],
+  "colors": [
+   {
+    "name": "white",
+    "hex": "#F5F5F2"
+   },
+   {
+    "name": "black-brown",
+    "hex": "#3B2F2A"
+   },
+   {
+    "name": "white stained oak effect",
+    "hex": "#D9CBB5"
+   }
+  ],
+  "price_usd": 29.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "minimalist",
+   "scandinavian",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Metric 90x55 cm agrees."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "LACK Side table, white, 21 5/8x21 5/8\"",
+  "category": "side_table",
+  "url": "https://www.ikea.com/us/en/p/lack-side-table-white-30449908/",
+  "w_cm": 54.9,
+  "d_cm": 54.9,
+  "h_cm": 45.1,
+  "seat_h_cm": null,
+  "w_in": 21.625,
+  "d_in": 21.625,
+  "h_in": 17.75,
+  "seat_h_in": null,
+  "materials": [
+   "particleboard",
+   "fiberboard",
+   "honeycomb paper filling"
+  ],
+  "colors": [
+   {
+    "name": "white",
+    "hex": "#F5F5F2"
+   },
+   {
+    "name": "black-brown",
+    "hex": "#3B2F2A"
+   },
+   {
+    "name": "white stained oak effect",
+    "hex": "#D9CBB5"
+   }
+  ],
+  "price_usd": 16.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "minimalist",
+   "scandinavian",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Price conflict: older pages show $8.99 to $12.99."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "PO\u00c4NG armchair, birch veneer/Knisa light beige",
+  "category": "accent_chair",
+  "url": "https://www.ikea.com/us/en/p/poaeng-armchair-birch-veneer-knisa-light-beige-s59305928/",
+  "w_cm": 67.9,
+  "d_cm": 81.9,
+  "h_cm": 100.0,
+  "seat_h_cm": 41.9,
+  "w_in": 26.75,
+  "d_in": 32.25,
+  "h_in": 39.375,
+  "seat_h_in": 16.5,
+  "materials": [
+   "layer-glued birch veneer",
+   "polyurethane foam",
+   "polyester fabric"
+  ],
+  "colors": [
+   {
+    "name": "birch veneer/Knisa light beige",
+    "hex": "#D9C9A8"
+   },
+   {
+    "name": "black-brown/Knisa light beige",
+    "hex": "#3B2F2A"
+   },
+   {
+    "name": "walnut effect/Knisa light beige",
+    "hex": "#7A5536"
+   },
+   {
+    "name": "birch veneer/Knisa black",
+    "hex": "#2A2A2A"
+   }
+  ],
+  "price_usd": 149.0,
+  "price_seen": "2026-10-31",
+  "style": [
+   "scandinavian",
+   "mid-century",
+   "minimalist"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Metric 68x82x100 cm agrees."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "HYLTARP sofa, Hemmesta light beige",
+  "category": "sofa",
+  "url": "https://www.ikea.com/us/en/p/hyltarp-sofa-hemmesta-light-beige-s59514941/",
+  "w_cm": 232.1,
+  "d_cm": 93.0,
+  "h_cm": 91.1,
+  "seat_h_cm": 47.9,
+  "w_in": 91.375,
+  "d_in": 36.625,
+  "h_in": 35.875,
+  "seat_h_in": 18.875,
+  "materials": [
+   "solid wood",
+   "particleboard",
+   "plywood",
+   "pocket springs",
+   "polyurethane foam",
+   "cotton/polyester cover"
+  ],
+  "colors": [
+   {
+    "name": "Hemmesta light beige",
+    "hex": "#D9CFBF"
+   },
+   {
+    "name": "Hallarp white",
+    "hex": "#EEEBE3"
+   }
+  ],
+  "price_usd": 1299.0,
+  "price_seen": "2026-10-31",
+  "style": [
+   "traditional",
+   "transitional"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Stands in for EKTORP, which had no current IKEA US listing in search results. The Hallarp white version is $1,199."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "KIVIK Sofa, Tibbleby beige/gray",
+  "category": "sofa",
+  "url": "https://www.ikea.com/us/en/p/kivik-sofa-tibbleby-beige-gray-s39440593/",
+  "w_cm": 228.0,
+  "d_cm": 94.9,
+  "h_cm": 82.9,
+  "seat_h_cm": 45.1,
+  "w_in": 89.75,
+  "d_in": 37.375,
+  "h_in": 32.625,
+  "seat_h_in": 17.75,
+  "materials": [
+   "particleboard",
+   "plywood",
+   "solid wood",
+   "pocket springs",
+   "high-resilience foam",
+   "polyester fabric"
+  ],
+  "colors": [
+   {
+    "name": "Tibbleby beige/gray",
+    "hex": "#B9B1A4"
+   }
+  ],
+  "price_usd": 799.0,
+  "price_seen": "2026-10-31",
+  "style": [
+   "contemporary",
+   "scandinavian",
+   "transitional"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Only one cover confirmed. Metric 228x95x83 cm agrees."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "S\u00d6DERHAMN sofa, Viarp beige/brown",
+  "category": "sofa",
+  "url": "https://www.ikea.com/us/en/p/soederhamn-sofa-viarp-beige-brown-s59305706/",
+  "w_cm": 198.1,
+  "d_cm": 99.1,
+  "h_cm": 82.9,
+  "seat_h_cm": 40.0,
+  "w_in": 78.0,
+  "d_in": 39.0,
+  "h_in": 32.625,
+  "seat_h_in": 15.75,
+  "materials": [
+   "plywood",
+   "fiberboard",
+   "solid wood",
+   "steel",
+   "polyurethane foam",
+   "cotton/polyester cover"
+  ],
+  "colors": [
+   {
+    "name": "Viarp beige/brown",
+    "hex": "#B8A58C"
+   },
+   {
+    "name": "Hillared dark blue",
+    "hex": "#2E3A55"
+   },
+   {
+    "name": "Gransel natural",
+    "hex": "#D6CCB8"
+   },
+   {
+    "name": "Fridtuna light beige",
+    "hex": "#D8CDBA"
+   }
+  ],
+  "price_usd": 969.0,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "minimalist",
+   "scandinavian"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Height includes back cushions. Seat height is from IKEA CA (40 cm) and the US Hillared listing. Price varies by cover."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "MALM bed frame, white/L\u00f6nset, Queen",
+  "category": "bed_queen",
+  "url": "https://www.ikea.com/us/en/p/malm-bed-frame-white-loenset-s99129476/",
+  "w_cm": 168.0,
+  "d_cm": 211.1,
+  "h_cm": 100.0,
+  "seat_h_cm": null,
+  "w_in": 66.125,
+  "d_in": 83.125,
+  "h_in": 39.375,
+  "seat_h_in": null,
+  "materials": [
+   "particleboard",
+   "fiberboard",
+   "steel center beam"
+  ],
+  "colors": [
+   {
+    "name": "white",
+    "hex": "#F4F4F2"
+   },
+   {
+    "name": "oak veneer",
+    "hex": "#C9A675"
+   }
+  ],
+  "price_usd": 369.0,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "minimalist",
+   "scandinavian"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "High headboard; footboard 15\". Slatted base included. Metric 168x211 cm agrees. The frame-only version is marked Last chance."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "MALM 6-drawer dresser, white, 63x30 3/4\"",
+  "category": "dresser",
+  "url": "https://m.ikea.com/us/en/catalog/products/art/30360468/",
+  "w_cm": 160.0,
+  "d_cm": 48.3,
+  "h_cm": 78.1,
+  "seat_h_cm": null,
+  "w_in": 63.0,
+  "d_in": 19.0,
+  "h_in": 30.75,
+  "seat_h_in": null,
+  "materials": [
+   "particleboard",
+   "fiberboard"
+  ],
+  "colors": [
+   {
+    "name": "white",
+    "hex": "#F4F4F2"
+   },
+   {
+    "name": "white stained oak veneer",
+    "hex": "#DCD0BD"
+   },
+   {
+    "name": "gray stained",
+    "hex": "#8C8C88"
+   }
+  ],
+  "price_usd": 299.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "minimalist",
+   "scandinavian"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Legacy mobile URL; no current /p/ URL found for white. Depth conflict: 19\" (US) vs 48 cm (other markets). May be ending (STORKLINTA may replace it)."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "HEMNES bed frame, white stain/L\u00f6nset, King",
+  "category": "bed_king",
+  "url": "https://www.ikea.com/us/en/p/hemnes-bed-frame-white-stain-loenset-s59019074/",
+  "w_cm": 207.0,
+  "d_cm": 213.0,
+  "h_cm": 120.0,
+  "seat_h_cm": null,
+  "w_in": 81.5,
+  "d_in": 83.875,
+  "h_in": 47.25,
+  "seat_h_in": null,
+  "materials": [
+   "solid pine",
+   "steel center beam"
+  ],
+  "colors": [
+   {
+    "name": "white stain",
+    "hex": "#E9E4DA"
+   },
+   {
+    "name": "dark gray stained",
+    "hex": "#5B5A57"
+   },
+   {
+    "name": "black-brown",
+    "hex": "#3B2F2A"
+   }
+  ],
+  "price_usd": 559.0,
+  "price_seen": "2026-10-31",
+  "style": [
+   "traditional",
+   "farmhouse",
+   "scandinavian"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Headboard 47 1/4\", footboard 26\". Slatted base included, mattress not."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "S\u00d6DERHAMN sectional, 4-seat, with chaise/Hillared beige",
+  "category": "sectional",
+  "url": "https://www.ikea.com/us/en/p/soederhamn-sectional-4-seat-with-chaise-hillared-beige-s69499756/",
+  "w_cm": 291.1,
+  "d_cm": 151.1,
+  "h_cm": 82.9,
+  "seat_h_cm": null,
+  "w_in": 114.625,
+  "d_in": 59.5,
+  "h_in": 32.625,
+  "seat_h_in": null,
+  "materials": [
+   "plywood",
+   "fiberboard",
+   "solid wood",
+   "steel",
+   "polyurethane foam"
+  ],
+  "colors": [
+   {
+    "name": "Hillared beige",
+    "hex": "#CBBFA8"
+   },
+   {
+    "name": "Viarp beige/brown",
+    "hex": "#B8A58C"
+   },
+   {
+    "name": "Fridtuna light beige",
+    "hex": "#D8CDBA"
+   }
+  ],
+  "price_usd": 1489.0,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "minimalist",
+   "scandinavian"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Depth is at the chaise; sofa section is 39\" deep. Sibling listings give 15 3/4\" seat height."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "KIVIK loveseat, Tibbleby beige/gray",
+  "category": "loveseat",
+  "url": "https://www.ikea.com/us/en/p/kivik-loveseat-tibbleby-beige-gray-s89440595/",
+  "w_cm": 189.9,
+  "d_cm": 94.9,
+  "h_cm": 82.9,
+  "seat_h_cm": 45.1,
+  "w_in": 74.75,
+  "d_in": 37.375,
+  "h_in": 32.625,
+  "seat_h_in": 17.75,
+  "materials": [
+   "particleboard",
+   "plywood",
+   "solid wood",
+   "pocket springs",
+   "high-resilience foam",
+   "polyester fabric"
+  ],
+  "colors": [
+   {
+    "name": "Tibbleby beige/gray",
+    "hex": "#B9B1A4"
+   }
+  ],
+  "price_usd": 749.0,
+  "price_seen": "2026-10-31",
+  "style": [
+   "contemporary",
+   "scandinavian",
+   "transitional"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Price may be stale ($699 also seen). Metric 190x95x83 cm agrees."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "LISABO table, ash veneer, 55 1/8x30 3/4\"",
+  "category": "dining_table_rect",
+  "url": "https://www.ikea.com/us/en/p/lisabo-table-ash-veneer-70294339/",
+  "w_cm": 140.0,
+  "d_cm": 78.1,
+  "h_cm": 74.0,
+  "seat_h_cm": null,
+  "w_in": 55.125,
+  "d_in": 30.75,
+  "h_in": 29.125,
+  "seat_h_in": null,
+  "materials": [
+   "ash veneer",
+   "fiberboard",
+   "solid birch legs"
+  ],
+  "colors": [
+   {
+    "name": "ash veneer",
+    "hex": "#D9C4A0"
+   },
+   {
+    "name": "black/ash veneer",
+    "hex": "#1F1F1F"
+   }
+  ],
+  "price_usd": 299.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "scandinavian",
+   "mid-century",
+   "japandi"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Seats 4. Price conflict: an older page shows $149."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "DOCKSTA table, white/white, 40 1/2\"",
+  "category": "dining_table_round",
+  "url": "https://www.ikea.com/us/en/p/docksta-table-white-white-s19324995/",
+  "w_cm": 102.9,
+  "d_cm": 102.9,
+  "h_cm": 74.9,
+  "seat_h_cm": null,
+  "w_in": 40.5,
+  "d_in": 40.5,
+  "h_in": 29.5,
+  "seat_h_in": null,
+  "materials": [
+   "particleboard",
+   "laminate",
+   "steel",
+   "ABS plastic"
+  ],
+  "colors": [
+   {
+    "name": "white/white",
+    "hex": "#F5F5F3"
+   }
+  ],
+  "price_usd": 279.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern",
+   "minimalist"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Round, 40 1/2\" diameter (103 cm). Ignore an older 41 3/8\" listing."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "STEFAN chair, brown-black",
+  "category": "dining_chair",
+  "url": "https://www.ikea.com/us/en/p/stefan-chair-brown-black-00211088/",
+  "w_cm": 41.9,
+  "d_cm": 48.9,
+  "h_cm": 89.9,
+  "seat_h_cm": 45.1,
+  "w_in": 16.5,
+  "d_in": 19.25,
+  "h_in": 35.375,
+  "seat_h_in": 17.75,
+  "materials": [
+   "solid pine"
+  ],
+  "colors": [
+   {
+    "name": "brown-black",
+    "hex": "#3A2C26"
+   }
+  ],
+  "price_usd": 35.0,
+  "price_seen": "2026-10-31",
+  "style": [
+   "traditional",
+   "farmhouse",
+   "scandinavian"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Metric 42x49x90 cm, seat 45 cm agrees."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "STIG bar stool with backrest, counter height black/black, 24 3/4\"",
+  "category": "bar_stool",
+  "url": "https://www.ikea.com/us/en/p/stig-bar-stool-with-backrest-counter-height-black-black-30498418/",
+  "w_cm": 40.0,
+  "d_cm": 41.9,
+  "h_cm": 89.9,
+  "seat_h_cm": 62.9,
+  "w_in": 15.75,
+  "d_in": 16.5,
+  "h_in": 35.375,
+  "seat_h_in": 24.75,
+  "materials": [
+   "steel",
+   "polypropylene"
+  ],
+  "colors": [
+   {
+    "name": "black/black",
+    "hex": "#1C1C1C"
+   },
+   {
+    "name": "white/white",
+    "hex": "#F2F2F2"
+   }
+  ],
+  "price_usd": 34.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "industrial",
+   "modern",
+   "minimalist"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "For 34-36\" counters."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "HEMNES TV unit, white stain, 72x18 1/2x22 1/2\"",
+  "category": "media_console",
+  "url": "https://www.ikea.com/us/en/p/hemnes-tv-unit-white-stain-30566049/",
+  "w_cm": 182.9,
+  "d_cm": 47.0,
+  "h_cm": 57.1,
+  "seat_h_cm": null,
+  "w_in": 72.0,
+  "d_in": 18.5,
+  "h_in": 22.5,
+  "seat_h_in": null,
+  "materials": [
+   "solid pine",
+   "fiberboard"
+  ],
+  "colors": [
+   {
+    "name": "white stain",
+    "hex": "#E9E4DA"
+   },
+   {
+    "name": "black-brown",
+    "hex": "#3B2F2A"
+   }
+  ],
+  "price_usd": 399.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "traditional",
+   "farmhouse",
+   "scandinavian"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Indexed page was about 450 days old, so the price may be stale. Metric 183x47x57 cm agrees."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "IDAN\u00c4S sideboard, white, 48 7/8x19 5/8x37 3/8\"",
+  "category": "sideboard",
+  "url": "https://www.ikea.com/us/en/p/idanaes-sideboard-white-60509627/",
+  "w_cm": 124.1,
+  "d_cm": 49.8,
+  "h_cm": 94.9,
+  "seat_h_cm": null,
+  "w_in": 48.875,
+  "d_in": 19.625,
+  "h_in": 37.375,
+  "seat_h_in": null,
+  "materials": [
+   "particleboard",
+   "fiberboard",
+   "solid wood legs"
+  ],
+  "colors": [
+   {
+    "name": "white",
+    "hex": "#F2F1EC"
+   },
+   {
+    "name": "dark brown stained",
+    "hex": "#4A3326"
+   }
+  ],
+  "price_usd": 399.0,
+  "price_seen": "2026-10-31",
+  "style": [
+   "traditional",
+   "transitional",
+   "scandinavian"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Materials from a non-US listing. Dark brown seen only outside the US. HEMNES sideboard had no current /p/ URL."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "MICKE desk, white, 41 3/8x19 5/8\"",
+  "category": "desk",
+  "url": "https://www.ikea.com/us/en/p/micke-desk-white-80213074/",
+  "w_cm": 105.1,
+  "d_cm": 49.8,
+  "h_cm": 74.9,
+  "seat_h_cm": null,
+  "w_in": 41.375,
+  "d_in": 19.625,
+  "h_in": 29.5,
+  "seat_h_in": null,
+  "materials": [
+   "particleboard",
+   "fiberboard",
+   "honeycomb paper filling",
+   "steel"
+  ],
+  "colors": [
+   {
+    "name": "white",
+    "hex": "#F4F4F2"
+   },
+   {
+    "name": "white/anthracite",
+    "hex": "#3E4045"
+   },
+   {
+    "name": "black-brown",
+    "hex": "#3B2F2A"
+   }
+  ],
+  "price_usd": 109.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "minimalist",
+   "modern",
+   "scandinavian"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Price conflict: $89.99 to $109.99 across US pages."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "MARKUS office chair, Vissle dark gray",
+  "category": "desk_chair",
+  "url": "https://www.ikea.com/us/en/p/markus-office-chair-vissle-dark-gray-90289172/",
+  "w_cm": 61.9,
+  "d_cm": 60.0,
+  "h_cm": 140.0,
+  "seat_h_cm": 46.0,
+  "w_in": 24.375,
+  "d_in": 23.625,
+  "h_in": 55.125,
+  "seat_h_in": 18.125,
+  "materials": [
+   "polyester mesh",
+   "steel",
+   "aluminum",
+   "polyurethane foam"
+  ],
+  "colors": [
+   {
+    "name": "Vissle dark gray",
+    "hex": "#4D4F52"
+   }
+  ],
+  "price_usd": 299.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "contemporary"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Height is the maximum (minimum 50 3/4\"). Seat height adjusts 18 1/8-22 1/2\". Price conflict: $199 also seen."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "STOCKHOLM 2025 rug, flatwoven, white/brown/light blue handwoven, 7'10\"x11'6\"",
+  "category": "rug",
+  "url": "https://www.ikea.com/us/en/p/stockholm-2025-rug-flatwoven-white-brown-light-blue-handwoven-70593814/",
+  "w_cm": 238.8,
+  "d_cm": 350.5,
+  "h_cm": null,
+  "seat_h_cm": null,
+  "w_in": 94.0,
+  "d_in": 138.0,
+  "h_in": null,
+  "seat_h_in": null,
+  "materials": [
+   "wool",
+   "cotton"
+  ],
+  "colors": [
+   {
+    "name": "white/brown/light blue",
+    "hex": "#E8E2D6"
+   },
+   {
+    "name": "black/white/light green",
+    "hex": "#2B2B2B"
+   }
+  ],
+  "price_usd": 599.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "scandinavian",
+   "contemporary",
+   "bohemian"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Converted from 7'10\" x 11'6\". Other sizes: 5'7\"x7'10\", 7'10\"x9'10\"."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "HEKTAR floor lamp, dark gray",
+  "category": "floor_lamp",
+  "url": "https://www.ikea.com/us/en/p/hektar-floor-lamp-dark-gray-70216544/",
+  "w_cm": 33.0,
+  "d_cm": 33.0,
+  "h_cm": 180.3,
+  "seat_h_cm": null,
+  "w_in": 13.0,
+  "d_in": 13.0,
+  "h_in": 71.0,
+  "seat_h_in": null,
+  "materials": [
+   "steel",
+   "aluminum"
+  ],
+  "colors": [
+   {
+    "name": "dark gray",
+    "hex": "#4A4B4D"
+   }
+  ],
+  "price_usd": 89.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "industrial",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Footprint is the 13\" base diameter; shade 12\"."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "RANARP work lamp, black",
+  "category": "table_lamp",
+  "url": "https://www.ikea.com/us/en/p/ranarp-work-lamp-black-10331392/",
+  "w_cm": null,
+  "d_cm": null,
+  "h_cm": 43.2,
+  "seat_h_cm": null,
+  "w_in": null,
+  "d_in": null,
+  "h_in": 17.0,
+  "seat_h_in": null,
+  "materials": [
+   "steel",
+   "cast iron"
+  ],
+  "colors": [
+   {
+    "name": "black",
+    "hex": "#1E1E1E"
+   },
+   {
+    "name": "off-white",
+    "hex": "#EDE8DC"
+   }
+  ],
+  "price_usd": 59.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "industrial",
+   "mid-century"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Base footprint not listed; shade 7\". Desk/work lamp."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "R\u00c5GKORN plant pot, indoor/outdoor dark gray/beige, 12 \u00bd\"",
+  "category": "planter",
+  "url": "https://www.ikea.com/us/en/p/ragkorn-plant-pot-indoor-outdoor-dark-gray-beige-40407559/",
+  "w_cm": 37.0,
+  "d_cm": 37.0,
+  "h_cm": 39.0,
+  "seat_h_cm": null,
+  "w_in": 14.5,
+  "d_in": 14.5,
+  "h_in": 15.25,
+  "seat_h_in": null,
+  "materials": [
+   "polyethylene"
+  ],
+  "colors": [
+   {
+    "name": "dark gray/beige",
+    "hex": "#6E6A63"
+   }
+  ],
+  "price_usd": 49.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "organic-modern",
+   "contemporary"
+  ],
+  "dims_source": "official listing, metric (IKEA PH/IN, search snippet)",
+  "note": "Outer size from metric listings (37 cm dia x 39 cm high); inches converted. 12 1/2\" is the largest inner pot."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "HEMNES bench with shoe storage, white, 33 1/2x12 5/8x25 5/8\"",
+  "category": "bench",
+  "url": "https://www.ikea.com/us/en/p/hemnes-bench-with-shoe-storage-white-00243800/",
+  "w_cm": 85.1,
+  "d_cm": 32.1,
+  "h_cm": 65.1,
+  "seat_h_cm": null,
+  "w_in": 33.5,
+  "d_in": 12.625,
+  "h_in": 25.625,
+  "seat_h_in": null,
+  "materials": [
+   "solid birch or pine (sources differ)"
+  ],
+  "colors": [
+   {
+    "name": "white",
+    "hex": "#F3F2EE"
+   }
+  ],
+  "price_usd": 99.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "traditional",
+   "farmhouse",
+   "scandinavian"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Top doubles as the seat. An older page shows $69.99."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "PO\u00c4NG ottoman, birch veneer/Knisa light beige",
+  "category": "ottoman",
+  "url": "https://www.ikea.com/us/en/p/poaeng-ottoman-birch-veneer-knisa-light-beige-s19305954/",
+  "w_cm": 67.9,
+  "d_cm": 54.0,
+  "h_cm": 39.1,
+  "seat_h_cm": null,
+  "w_in": 26.75,
+  "d_in": 21.25,
+  "h_in": 15.375,
+  "seat_h_in": null,
+  "materials": [
+   "layer-glued birch veneer",
+   "polyurethane foam",
+   "polyester fabric"
+  ],
+  "colors": [
+   {
+    "name": "birch veneer/Knisa light beige",
+    "hex": "#D9C9A8"
+   },
+   {
+    "name": "black-brown/Knisa light beige",
+    "hex": "#3B2F2A"
+   },
+   {
+    "name": "birch veneer/Knisa bright orange",
+    "hex": "#E07A2E"
+   }
+  ],
+  "price_usd": 80.0,
+  "price_seen": "2026-10-31",
+  "style": [
+   "scandinavian",
+   "mid-century"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "IKEA CA gives 38 cm seat height."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "IKORNNES floor mirror, ash, 20 1/2x65 3/4\"",
+  "category": "floor_mirror",
+  "url": "https://www.ikea.com/us/en/p/ikornnes-floor-mirror-ash-90524042/",
+  "w_cm": 52.1,
+  "d_cm": null,
+  "h_cm": 167.0,
+  "seat_h_cm": null,
+  "w_in": 20.5,
+  "d_in": null,
+  "h_in": 65.75,
+  "seat_h_in": null,
+  "materials": [
+   "ash veneer",
+   "glass"
+  ],
+  "colors": [
+   {
+    "name": "ash",
+    "hex": "#D8C3A0"
+   }
+  ],
+  "price_usd": 199.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "scandinavian",
+   "japandi",
+   "minimalist"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Free-standing on a leaning stand; footprint depth not found, so measure it."
+ },
+ {
+  "retailer": "IKEA",
+  "name": "R\u00c5SKOG utility cart, white, 13 3/4x17 3/4x30 3/8\"",
+  "category": "bar_cart",
+  "url": "https://www.ikea.com/us/en/p/raskog-utility-cart-white-30586783/",
+  "w_cm": 34.9,
+  "d_cm": 45.1,
+  "h_cm": 77.2,
+  "seat_h_cm": null,
+  "w_in": 13.75,
+  "d_in": 17.75,
+  "h_in": 30.375,
+  "seat_h_in": null,
+  "materials": [
+   "steel"
+  ],
+  "colors": [
+   {
+    "name": "white",
+    "hex": "#F2F2F0"
+   },
+   {
+    "name": "black",
+    "hex": "#1E1E1E"
+   },
+   {
+    "name": "red-brown",
+    "hex": "#7A3B2E"
+   },
+   {
+    "name": "pink",
+    "hex": "#E8B7B5"
+   }
+  ],
+  "price_usd": 39.99,
+  "price_seen": "2026-10-31",
+  "style": [
+   "industrial",
+   "minimalist",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "IKEA labels these length 13 3/4\", width 17 3/4\"; which side faces front is ambiguous."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Harmony Sofa (82\")",
+  "category": "sofa",
+  "url": "https://www.westelm.com/products/harmony-sofa-h2479/",
+  "w_cm": 208.3,
+  "d_cm": 104.1,
+  "h_cm": 88.9,
+  "seat_h_cm": 50.8,
+  "w_in": 82,
+  "d_in": 41,
+  "h_in": 35,
+  "seat_h_in": 20,
+  "materials": [
+   "kiln-dried engineered hardwood frame",
+   "sinuous springs",
+   "fiber-wrapped foam seat cushions",
+   "feather/down blend back cushions"
+  ],
+  "colors": [
+   {
+    "name": "Performance Yarn Dyed Linen Weave, Alabaster",
+    "hex": "#EEE9DF"
+   },
+   {
+    "name": "Performance Distressed Velvet, Sand",
+    "hex": "#C7B49A"
+   },
+   {
+    "name": "Performance Chunky Boucle, Honey",
+    "hex": "#C99A5B"
+   },
+   {
+    "name": "Twill, Pewter",
+    "hex": "#8D8C88"
+   }
+  ],
+  "price_usd": 2449,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "contemporary"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Price is the low end of the in-stock 82-92\" listing; the made-to-order price wasn't found. Seat depth 21\", arm height 23\"."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Harmony 2-Piece Chaise Sectional (112\")",
+  "category": "sectional",
+  "url": "https://www.westelm.com/products/harmony-2-piece-chaise-sectional-h2478/",
+  "w_cm": 284.5,
+  "d_cm": 167.6,
+  "h_cm": 88.9,
+  "seat_h_cm": 50.8,
+  "w_in": 112,
+  "d_in": 66,
+  "h_in": 35,
+  "seat_h_in": 20,
+  "materials": null,
+  "colors": null,
+  "price_usd": null,
+  "price_seen": null,
+  "style": [
+   "modern",
+   "contemporary"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Price not found. A mobile page with the same code lists 118x70x34 (Down-Filled variant). Check which variant you mean."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Auburn Loveseat (70\")",
+  "category": "loveseat",
+  "url": "https://www.westelm.com/products/auburn-sofa-70-h3191/",
+  "w_cm": 177.8,
+  "d_cm": 78.7,
+  "h_cm": 77.5,
+  "seat_h_cm": 43.2,
+  "w_in": 70,
+  "d_in": 31,
+  "h_in": 30.5,
+  "seat_h_in": 17,
+  "materials": [
+   "fabric upholstery",
+   "wood legs (Cool Walnut finish)"
+  ],
+  "colors": [
+   {
+    "name": "Twill, Silver",
+    "hex": "#B8BABB"
+   },
+   {
+    "name": "Twill, Black Indigo",
+    "hex": "#2A3142"
+   },
+   {
+    "name": "Twill, Platinum",
+    "hex": "#CBC8C1"
+   },
+   {
+    "name": "Distressed Velvet, Light Pink",
+    "hex": "#E2BDB5"
+   }
+  ],
+  "price_usd": 799,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Price is a 'from' figure ($799-$1,199 by fabric). Some colours may be older options. Alternative: Eddy Loveseat 74x34.5x33, seat 19\"."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Viv Swivel Chair",
+  "category": "accent_chair",
+  "url": "https://www.westelm.com/products/viv-swivel-chair-h4573/",
+  "w_cm": 74.9,
+  "d_cm": 78.7,
+  "h_cm": 74.9,
+  "seat_h_cm": 48.3,
+  "w_in": 29.5,
+  "d_in": 31,
+  "h_in": 29.5,
+  "seat_h_in": 19,
+  "materials": [
+   "performance fabric upholstery",
+   "swivel base"
+  ],
+  "colors": [
+   {
+    "name": "Performance Velvet, Dijon",
+    "hex": "#C49A2C"
+   },
+   {
+    "name": "Performance Velvet, Ink Blue",
+    "hex": "#26324D"
+   },
+   {
+    "name": "Performance Chunky Boucle, White",
+    "hex": "#F0EDE5"
+   },
+   {
+    "name": "Performance Woven Boucle, Fern",
+    "hex": "#6E7A52"
+   }
+  ],
+  "price_usd": 699,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "contemporary"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Price is a 'from' figure; range $599-$1,598 across snapshots."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Reeve Marble Coffee Table (48\")",
+  "category": "coffee_table",
+  "url": "https://www.westelm.com/products/reeve-mid-century-rectangular-coffee-table-h1181/",
+  "w_cm": 121.9,
+  "d_cm": 50.8,
+  "h_cm": 43.2,
+  "seat_h_cm": null,
+  "w_in": 48,
+  "d_in": 20,
+  "h_in": 17,
+  "seat_h_in": null,
+  "materials": [
+   "carrara marble veneer",
+   "engineered wood",
+   "solid wood base"
+  ],
+  "colors": [
+   {
+    "name": "White Carrara Marble / Acorn",
+    "hex": "#EDEBE7"
+   }
+  ],
+  "price_usd": 699,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Only the Acorn base found. The Reeve Oval (58x24x17, $799) also exists."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Reeve Mid-Century Marble Side Table (28\")",
+  "category": "side_table",
+  "url": "https://www.westelm.com/products/reeve-mid-century-side-table-marble-h955/",
+  "w_cm": 71.1,
+  "d_cm": 35.6,
+  "h_cm": 57.8,
+  "seat_h_cm": null,
+  "w_in": 28,
+  "d_in": 14,
+  "h_in": 22.75,
+  "seat_h_in": null,
+  "materials": [
+   "carrara marble veneer",
+   "engineered wood",
+   "solid wood legs"
+  ],
+  "colors": [
+   {
+    "name": "White Carrara Marble / Walnut",
+    "hex": "#EDEBE7"
+   }
+  ],
+  "price_usd": 349,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Long narrow rectangle. Price from a category page."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Mid-Century Extendable Dining Table (60\"\u201380\")",
+  "category": "dining_table_rect",
+  "url": "https://www.westelm.com/products/mid-century-modern-extendable-dining-table-h10973/",
+  "w_cm": 152.4,
+  "d_cm": 96.5,
+  "h_cm": 76.2,
+  "seat_h_cm": null,
+  "w_in": 60,
+  "d_in": 38,
+  "h_in": 30,
+  "seat_h_in": null,
+  "materials": [
+   "wood (Fair Trade Certified facility)"
+  ],
+  "colors": [
+   {
+    "name": "Acorn",
+    "hex": "#A87A4F"
+   },
+   {
+    "name": "Walnut",
+    "hex": "#5C4033"
+   }
+  ],
+  "price_usd": null,
+  "price_seen": null,
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet); height from third-party (Apartment Therapy, AptDeco)",
+  "note": "Closed size; extends to 80\" with a drop-in leaf. Price not tied to this size ($799-$1,149 family range)."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Silhouette Pedestal Marble Dining Table (48\")",
+  "category": "dining_table_round",
+  "url": "https://www.westelm.com/products/silhouette-pedestal-dining-table-h2402/",
+  "w_cm": 121.9,
+  "d_cm": 121.9,
+  "h_cm": 76.2,
+  "seat_h_cm": null,
+  "w_in": 48,
+  "d_in": 48,
+  "h_in": 30,
+  "seat_h_in": null,
+  "materials": [
+   "solid marble",
+   "metal base (antique brass finish)"
+  ],
+  "colors": [
+   {
+    "name": "White Marble",
+    "hex": "#EFEEEA"
+   },
+   {
+    "name": "Antique Brass base",
+    "hex": "#A57C3E"
+   }
+  ],
+  "price_usd": 1799,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "glam"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Round, 48\" diameter. Base diameter 20\", 28.75\" leg clearance. Seats 4."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Slope Dining Chair (Set of 2) - Metal Legs",
+  "category": "dining_chair",
+  "url": "https://www.westelm.com/products/slope-upholstered-dining-chair-h4008/",
+  "w_cm": 48.3,
+  "d_cm": 62.0,
+  "h_cm": 84.6,
+  "seat_h_cm": 50.2,
+  "w_in": 19,
+  "d_in": 24.4,
+  "h_in": 33.3,
+  "seat_h_in": 19.75,
+  "materials": [
+   "bentwood seat with foam",
+   "fabric upholstery",
+   "powder-coated iron base"
+  ],
+  "colors": [
+   {
+    "name": "Yarn Dyed Linen Weave, Alabaster",
+    "hex": "#EEE9DF"
+   },
+   {
+    "name": "Twill, Sand",
+    "hex": "#CDBB9C"
+   },
+   {
+    "name": "Velvet, Ink Blue",
+    "hex": "#26324D"
+   },
+   {
+    "name": "Distressed Velvet, Camel",
+    "hex": "#B98552"
+   }
+  ],
+  "price_usd": 549,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "minimalist"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Price is per SET OF 2 and is a 'from' figure. Dimensions are per chair."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Slope Leather Counter Stool (26\")",
+  "category": "bar_stool",
+  "url": "https://www.westelm.com/products/slope-leather-bar-counter-stools-h1752/",
+  "w_cm": 48.3,
+  "d_cm": 55.1,
+  "h_cm": 91.4,
+  "seat_h_cm": 66.0,
+  "w_in": 19,
+  "d_in": 21.7,
+  "h_in": 36,
+  "seat_h_in": 26,
+  "materials": [
+   "top-grain or vegan leather",
+   "powder-coated iron legs"
+  ],
+  "colors": [
+   {
+    "name": "Vegan Leather, Saddle",
+    "hex": "#8B5A2B"
+   },
+   {
+    "name": "Saddle Leather, Slate",
+    "hex": "#5D6469"
+   },
+   {
+    "name": "Ludlow Leather, Navy",
+    "hex": "#2C3A56"
+   }
+  ],
+  "price_usd": 499,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "minimalist"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "'From' price ($499-$549). Many combinations no longer available."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Mid-Century Bed (Queen)",
+  "category": "bed_queen",
+  "url": "https://www.westelm.com/products/mid-century-bedframe-acorn-h001/",
+  "w_cm": 162.6,
+  "d_cm": 213.4,
+  "h_cm": 118.7,
+  "seat_h_cm": null,
+  "w_in": 64,
+  "d_in": 84,
+  "h_in": 46.75,
+  "seat_h_in": null,
+  "materials": [
+   "kiln-dried solid and engineered wood",
+   "solid pine slats"
+  ],
+  "colors": [
+   {
+    "name": "Acorn",
+    "hex": "#A87A4F"
+   },
+   {
+    "name": "Dark Walnut",
+    "hex": "#4B3327"
+   },
+   {
+    "name": "Cerused White",
+    "hex": "#E4DED3"
+   }
+  ],
+  "price_usd": 1299,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Mattress area 60.7x80\". 8\" clearance under."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Mid-Century Nightstand (18\")",
+  "category": "nightstand",
+  "url": "https://www.westelm.com/products/mid-century-nightstand-acorn-g968/",
+  "w_cm": 45.7,
+  "d_cm": 38.1,
+  "h_cm": 61.0,
+  "seat_h_cm": null,
+  "w_in": 18,
+  "d_in": 15,
+  "h_in": 24,
+  "seat_h_in": null,
+  "materials": [
+   "solid eucalyptus",
+   "engineered wood with acacia veneer"
+  ],
+  "colors": [
+   {
+    "name": "Acorn",
+    "hex": "#A87A4F"
+   },
+   {
+    "name": "Cerused White",
+    "hex": "#E4DED3"
+   }
+  ],
+  "price_usd": 399,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "'From' price. A 25\" size (25x18.5x28) also exists."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Mid-Century 6-Drawer Dresser (56\")",
+  "category": "dresser",
+  "url": "https://www.westelm.com/products/mid-century-6-drawer-dresser-g815/",
+  "w_cm": 142.2,
+  "d_cm": 45.7,
+  "h_cm": 91.4,
+  "seat_h_cm": null,
+  "w_in": 56,
+  "d_in": 18,
+  "h_in": 36,
+  "seat_h_in": null,
+  "materials": [
+   "solid eucalyptus",
+   "engineered wood with acacia veneer"
+  ],
+  "colors": [
+   {
+    "name": "Acorn",
+    "hex": "#A87A4F"
+   },
+   {
+    "name": "Dark Walnut",
+    "hex": "#4B3327"
+   },
+   {
+    "name": "Cerused White",
+    "hex": "#E4DED3"
+   },
+   {
+    "name": "Pebble",
+    "hex": "#C9C3B8"
+   }
+  ],
+  "price_usd": 1499,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Drawers extend 8\"; allow about 26\" in front when open."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Mid-Century Media Console (58\")",
+  "category": "media_console",
+  "url": "https://www.westelm.com/products/mid-century-media-console-large-h418/",
+  "w_cm": 147.3,
+  "d_cm": 48.3,
+  "h_cm": 76.2,
+  "seat_h_cm": null,
+  "w_in": 58,
+  "d_in": 19,
+  "h_in": 30,
+  "seat_h_in": null,
+  "materials": [
+   "solid eucalyptus",
+   "engineered wood with acacia veneer"
+  ],
+  "colors": [
+   {
+    "name": "Acorn",
+    "hex": "#A87A4F"
+   },
+   {
+    "name": "Dark Walnut",
+    "hex": "#4B3327"
+   }
+  ],
+  "price_usd": 999,
+  "price_seen": null,
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Price from an old category page and may be stale. The 80\" version is 80x19x27, $1,799."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Mid-Century Desk (52\")",
+  "category": "desk",
+  "url": "https://www.westelm.com/products/mid-century-desk-acorn-h209/",
+  "w_cm": 132.1,
+  "d_cm": 61.0,
+  "h_cm": 76.2,
+  "seat_h_cm": null,
+  "w_in": 52,
+  "d_in": 24,
+  "h_in": 30,
+  "seat_h_in": null,
+  "materials": [
+   "solid eucalyptus",
+   "engineered wood with acacia veneer"
+  ],
+  "colors": [
+   {
+    "name": "Acorn",
+    "hex": "#A87A4F"
+   },
+   {
+    "name": "Dark Walnut",
+    "hex": "#4B3327"
+   },
+   {
+    "name": "Cerused White",
+    "hex": "#E4DED3"
+   },
+   {
+    "name": "Pebble",
+    "hex": "#C9C3B8"
+   }
+  ],
+  "price_usd": 999,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "21\" knee clearance. Price conflict: $699 to $999 across snapshots."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Slope Leather Swivel Office Chair",
+  "category": "desk_chair",
+  "url": "https://www.westelm.com/products/slope-leather-office-chair-h2113/",
+  "w_cm": 60.5,
+  "d_cm": 62.5,
+  "h_cm": 85.1,
+  "seat_h_cm": 44.5,
+  "w_in": 23.8,
+  "d_in": 24.6,
+  "h_in": 33.5,
+  "seat_h_in": 17.5,
+  "materials": [
+   "leather",
+   "swivel base"
+  ],
+  "colors": null,
+  "price_usd": 439,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "minimalist"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Minimum height and seat height shown (33.5-36.7\" and 17.5-22\"). Base 26.2\" diameter. 'From' price."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Heathered Basketweave Wool Rug (8'x10')",
+  "category": "rug",
+  "url": "https://www.westelm.com/products/mid-century-heathered-basketweave-wool-rug-steel-t1811/",
+  "w_cm": 243.8,
+  "d_cm": 304.8,
+  "h_cm": null,
+  "seat_h_cm": null,
+  "w_in": 96,
+  "d_in": 120,
+  "h_in": null,
+  "seat_h_in": null,
+  "materials": [
+   "wool"
+  ],
+  "colors": [
+   {
+    "name": "Steel",
+    "hex": "#8A9097"
+   }
+  ],
+  "price_usd": 699,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "minimalist"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Size is the nominal 8x10 label, not a measured size."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Overarching Linen Shade Floor Lamp (79\")",
+  "category": "floor_lamp",
+  "url": "https://www.westelm.com/products/overarching-linen-shade-floor-lamp-w3394/",
+  "w_cm": 147.3,
+  "d_cm": 48.3,
+  "h_cm": 200.7,
+  "seat_h_cm": null,
+  "w_in": 58,
+  "d_in": 19,
+  "h_in": 79,
+  "seat_h_in": null,
+  "materials": [
+   "metal",
+   "linen shade"
+  ],
+  "colors": [
+   {
+    "name": "Antique Brass",
+    "hex": "#A57C3E"
+   },
+   {
+    "name": "Antique Bronze",
+    "hex": "#5A4636"
+   }
+  ],
+  "price_usd": 449,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "58\" is the arc reach; base 16\" diameter, shade 19\" diameter."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Asymmetry Ceramic Table Lamp (31\")",
+  "category": "table_lamp",
+  "url": "https://www.westelm.com/products/asymmetry-ceramic-table-lamp-large-w3711/",
+  "w_cm": 30.5,
+  "d_cm": 30.5,
+  "h_cm": 77.5,
+  "seat_h_cm": null,
+  "w_in": 12,
+  "d_in": 12,
+  "h_in": 30.5,
+  "seat_h_in": null,
+  "materials": [
+   "ceramic",
+   "linen shade"
+  ],
+  "colors": [
+   {
+    "name": "White",
+    "hex": "#F2F0EA"
+   },
+   {
+    "name": "Black",
+    "hex": "#1E1E1E"
+   },
+   {
+    "name": "Speckled Moss",
+    "hex": "#8A8C68"
+   }
+  ],
+  "price_usd": 199,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "organic-modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Footprint is the 12\" shade diameter. Price is per lamp."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Metal Frame Floor Mirror (30\" x 72\")",
+  "category": "floor_mirror",
+  "url": "https://www.westelm.com/products/metal-floor-mirror-w446/",
+  "w_cm": 76.2,
+  "d_cm": 4.4,
+  "h_cm": 182.9,
+  "seat_h_cm": null,
+  "w_in": 30,
+  "d_in": 1.75,
+  "h_in": 72,
+  "seat_h_in": null,
+  "materials": [
+   "metal frame",
+   "mirror glass"
+  ],
+  "colors": [
+   {
+    "name": "Antique Brass",
+    "hex": "#A57C3E"
+   },
+   {
+    "name": "Dark Bronze",
+    "hex": "#4A3B30"
+   },
+   {
+    "name": "Brushed Nickel",
+    "hex": "#B5B3AD"
+   }
+  ],
+  "price_usd": 399,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "minimalist"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Leans against a wall, so the real floor footprint depends on the lean. Anti-tip kit included."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Mid-Century Bar Cart (32\")",
+  "category": "bar_cart",
+  "url": "https://www.westelm.com/products/parker-mid-century-bar-cart-h415/",
+  "w_cm": 82.3,
+  "d_cm": 50.5,
+  "h_cm": 81.3,
+  "seat_h_cm": null,
+  "w_in": 32.4,
+  "d_in": 19.9,
+  "h_in": 32,
+  "seat_h_in": null,
+  "materials": [
+   "solid eucalyptus",
+   "engineered wood with acacia veneer",
+   "brass-finished rails"
+  ],
+  "colors": [
+   {
+    "name": "Acorn",
+    "hex": "#A87A4F"
+   }
+  ],
+  "price_usd": 399,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "URL inferred from a print-view result and not opened."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Mid-Century Bookshelf w/ Drawer (38\")",
+  "category": "bookcase",
+  "url": "https://www.westelm.com/products/mid-century-bookshelf-wide-h1056/",
+  "w_cm": 96.5,
+  "d_cm": 38.1,
+  "h_cm": 178.4,
+  "seat_h_cm": null,
+  "w_in": 38,
+  "d_in": 15,
+  "h_in": 70.25,
+  "seat_h_in": null,
+  "materials": [
+   "FSC-certified wood"
+  ],
+  "colors": [
+   {
+    "name": "Acorn",
+    "hex": "#A87A4F"
+   }
+  ],
+  "price_usd": 999,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "URL inferred from a print-view result. Price ambiguous ($699 offer also seen)."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Mid-Century Bench",
+  "category": "bench",
+  "url": "https://www.westelm.com/products/mid-century-bench-h1482/",
+  "w_cm": 110.5,
+  "d_cm": 41.9,
+  "h_cm": 48.3,
+  "seat_h_cm": null,
+  "w_in": 43.5,
+  "d_in": 16.5,
+  "h_in": 19,
+  "seat_h_in": null,
+  "materials": [
+   "solid eucalyptus",
+   "engineered wood with acacia veneer",
+   "upholstered cushion"
+  ],
+  "colors": [
+   {
+    "name": "Performance Chenille Tweed, Midnight",
+    "hex": "#222B40"
+   },
+   {
+    "name": "Yarn Dyed Linen Weave, Alabaster",
+    "hex": "#EEE9DF"
+   },
+   {
+    "name": "Linen Weave, Frost Gray",
+    "hex": "#C5C7C6"
+   }
+  ],
+  "price_usd": 349,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "'From' price. 19\" height is probably the seat top."
+ },
+ {
+  "retailer": "West Elm",
+  "name": "Bishop Ceramic Indoor/Outdoor Pedestal Planter, Medium Floor (12\"D x 19\"H)",
+  "category": "planter",
+  "url": "https://www.westelm.com/products/bishop-pedestal-planters-d6246/",
+  "w_cm": 30.5,
+  "d_cm": 30.5,
+  "h_cm": 48.3,
+  "seat_h_cm": null,
+  "w_in": 12,
+  "d_in": 12,
+  "h_in": 19,
+  "seat_h_in": null,
+  "materials": [
+   "glazed earthenware"
+  ],
+  "colors": [
+   {
+    "name": "Alabaster",
+    "hex": "#EFEADF"
+   },
+   {
+    "name": "Black",
+    "hex": "#1C1C1C"
+   }
+  ],
+  "price_usd": 179,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "minimalist"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Round, 12\" diameter."
+ },
+ {
+  "retailer": "Pottery Barn",
+  "name": "PB Comfort Square Arm Sofa (77\")",
+  "category": "sofa",
+  "url": "https://www.potterybarn.com/products/pb-comfort-square-upholstered-sofa-collection/",
+  "w_cm": 195.6,
+  "d_cm": 99.1,
+  "h_cm": 94.0,
+  "seat_h_cm": 50.8,
+  "w_in": 77,
+  "d_in": 39,
+  "h_in": 37,
+  "seat_h_in": 20,
+  "materials": null,
+  "colors": null,
+  "price_usd": null,
+  "price_seen": null,
+  "style": [
+   "traditional",
+   "transitional"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Only collection-wide prices found ($1,599-$4,699). Materials and fabrics not retrieved."
+ },
+ {
+  "retailer": "Pottery Barn",
+  "name": "Benchwright Extendable Dining Table (60\"\u201384\")",
+  "category": "dining_table_rect",
+  "url": "https://www.potterybarn.com/products/benchwright-extending-dining-table/",
+  "w_cm": 152.4,
+  "d_cm": 96.5,
+  "h_cm": 76.2,
+  "seat_h_cm": null,
+  "w_in": 60,
+  "d_in": 38,
+  "h_in": 30,
+  "seat_h_in": null,
+  "materials": null,
+  "colors": [
+   {
+    "name": "Blackened Oak",
+    "hex": "#2F2B27"
+   },
+   {
+    "name": "Rustic Mahogany",
+    "hex": "#6A3D2C"
+   },
+   {
+    "name": "Seadrift",
+    "hex": "#CFC7B9"
+   },
+   {
+    "name": "Gray Wash",
+    "hex": "#9D9891"
+   }
+  ],
+  "price_usd": 1889,
+  "price_seen": "2026-10-31",
+  "style": [
+   "farmhouse",
+   "traditional"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Closed size; extends to 84\". $1,889 may be a sale or 'from' price ($2,099 possibly regular)."
+ },
+ {
+  "retailer": "Pottery Barn",
+  "name": "Aaron Dining Chair",
+  "category": "dining_chair",
+  "url": "https://www.potterybarn.com/products/aaron-chair/",
+  "w_cm": 55.9,
+  "d_cm": 59.7,
+  "h_cm": 94.0,
+  "seat_h_cm": 45.7,
+  "w_in": 22,
+  "d_in": 23.5,
+  "h_in": 37,
+  "seat_h_in": 18,
+  "materials": [
+   "solid rubberwood"
+  ],
+  "colors": [
+   {
+    "name": "Seadrift",
+    "hex": "#CFC7B9"
+   },
+   {
+    "name": "Vintage Spruce",
+    "hex": "#8A6A48"
+   }
+  ],
+  "price_usd": 399,
+  "price_seen": "2026-10-31",
+  "style": [
+   "farmhouse",
+   "transitional"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "'From' price. Vintage Spruce seen on the armchair variant."
+ },
+ {
+  "retailer": "Crate & Barrel",
+  "name": "Axis 3-Seat 88\" Sofa",
+  "category": "sofa",
+  "url": "https://www.crateandbarrel.com/axis-3-seat-88-sofa/s543685",
+  "w_cm": 223.5,
+  "d_cm": 109.2,
+  "h_cm": 81.3,
+  "seat_h_cm": null,
+  "w_in": 88,
+  "d_in": 43,
+  "h_in": 32,
+  "seat_h_in": null,
+  "materials": [
+   "kiln-dried hardwood frame",
+   "polyfoam seat cushions",
+   "fiber/feather-down wrap",
+   "fabric upholstery"
+  ],
+  "colors": [
+   {
+    "name": "Douglas Ice",
+    "hex": "#E6E4DE"
+   },
+   {
+    "name": "Douglas Spice",
+    "hex": "#A8643A"
+   },
+   {
+    "name": "Douglas Espresso",
+    "hex": "#4A3A30"
+   },
+   {
+    "name": "Wales Camel",
+    "hex": "#B58A5A"
+   }
+  ],
+  "price_usd": 2249,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "contemporary"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Seat height not listed officially (a resale listing says about 18.5\"). The Axis Classic 76\" Apartment Sofa is 76x38x32."
+ },
+ {
+  "retailer": "Crate & Barrel",
+  "name": "Lounge 93\" Sofa",
+  "category": "sofa",
+  "url": "https://www.crateandbarrel.com/lounge-93-sofa/s505694",
+  "w_cm": 236.2,
+  "d_cm": 104.1,
+  "h_cm": 94.0,
+  "seat_h_cm": 45.7,
+  "w_in": 93,
+  "d_in": 41,
+  "h_in": 37,
+  "seat_h_in": 18,
+  "materials": [
+   "kiln-dried hardwood frame",
+   "plant-based polyfoam cushions",
+   "fiber-down blend wrap"
+  ],
+  "colors": [
+   {
+    "name": "Mossa Chai",
+    "hex": "#B89F82"
+   },
+   {
+    "name": "Taft Cement",
+    "hex": "#A9A59C"
+   },
+   {
+    "name": "Mossa Olive",
+    "hex": "#7A7550"
+   },
+   {
+    "name": "Taft Pearl",
+    "hex": "#E8E3D8"
+   }
+  ],
+  "price_usd": 2249,
+  "price_seen": "2026-10-31",
+  "style": [
+   "contemporary",
+   "transitional"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Current name of the former Lounge II. Seat height from the C&B UAE franchise listing. Lounge Deep 93\" is 93x46x37, $2,349."
+ },
+ {
+  "retailer": "Crate & Barrel",
+  "name": "Gather 3-Piece L-Shaped Small Space Wedge Sectional Sofa (Regular depth)",
+  "category": "sectional",
+  "url": "https://www.crateandbarrel.com/gather-3-piece-l-shaped-small-space-wedge-sectional-sofa/s467186",
+  "w_cm": 218.4,
+  "d_cm": 218.4,
+  "h_cm": 91.4,
+  "seat_h_cm": null,
+  "w_in": 86,
+  "d_in": 86,
+  "h_in": 36,
+  "seat_h_in": null,
+  "materials": [
+   "FSC-certified engineered hardwood frame",
+   "innerspring cores wrapped in polyfoam",
+   "fabric upholstery"
+  ],
+  "colors": [
+   {
+    "name": "Bouvier Oat",
+    "hex": "#D8CBB3"
+   },
+   {
+    "name": "Icon Stone",
+    "hex": "#B5AEA2"
+   }
+  ],
+  "price_usd": 4387,
+  "price_seen": "2026-10-31",
+  "style": [
+   "contemporary",
+   "transitional"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "L-shaped, 86\" each side; seat section 38\" deep. Sale price $3,509.60 seen."
+ },
+ {
+  "retailer": "Crate & Barrel",
+  "name": "Basque 65\" Weathered Light Brown Solid Wood Dining Table",
+  "category": "dining_table_rect",
+  "url": "https://www.crateandbarrel.com/basque-65-weathered-light-brown-solid-wood-dining-table/s599723",
+  "w_cm": 165.1,
+  "d_cm": 96.5,
+  "h_cm": 74.9,
+  "seat_h_cm": null,
+  "w_in": 65,
+  "d_in": 38,
+  "h_in": 29.5,
+  "seat_h_in": null,
+  "materials": [
+   "solid mango wood"
+  ],
+  "colors": [
+   {
+    "name": "Weathered Light Brown",
+    "hex": "#B89A78"
+   },
+   {
+    "name": "Vintage Brown",
+    "hex": "#6E4E36"
+   }
+  ],
+  "price_usd": 799,
+  "price_seen": "2026-10-31",
+  "style": [
+   "farmhouse",
+   "transitional"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Seats 6. Vintage Brown may exist only in larger sizes. Other sizes: 82\", 104\", 82-118\" extendable."
+ },
+ {
+  "retailer": "Crate & Barrel",
+  "name": "Palisades 48\" Whitewashed Wood Round Pedestal Dining Table",
+  "category": "dining_table_round",
+  "url": "https://www.crateandbarrel.com/palisades-48-round-whitewashed-wood-dining-table/s375994",
+  "w_cm": 121.9,
+  "d_cm": 121.9,
+  "h_cm": 73.7,
+  "seat_h_cm": null,
+  "w_in": 48,
+  "d_in": 48,
+  "h_in": 29,
+  "seat_h_in": null,
+  "materials": [
+   "solid oak",
+   "oak veneer",
+   "engineered hardwood"
+  ],
+  "colors": [
+   {
+    "name": "Whitewashed",
+    "hex": "#E3D9C6"
+   },
+   {
+    "name": "Walnut",
+    "hex": "#5E412A"
+   }
+  ],
+  "price_usd": 999,
+  "price_seen": "2026-10-31",
+  "style": [
+   "coastal",
+   "transitional"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Substitute: there is no round Basque table. Price conflict ($999-$1,199)."
+ },
+ {
+  "retailer": "Crate & Barrel",
+  "name": "Tate Black Wood Dining Chair",
+  "category": "dining_chair",
+  "url": "https://www.crateandbarrel.com/tate-black-wood-dining-chair/s192624",
+  "w_cm": 45.7,
+  "d_cm": 55.2,
+  "h_cm": 78.1,
+  "seat_h_cm": null,
+  "w_in": 18,
+  "d_in": 21.75,
+  "h_in": 30.75,
+  "seat_h_in": null,
+  "materials": [
+   "wood"
+  ],
+  "colors": [
+   {
+    "name": "Black",
+    "hex": "#1E1E1E"
+   },
+   {
+    "name": "Warm Brown",
+    "hex": "#7A5236"
+   }
+  ],
+  "price_usd": 499,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "CHECK HEIGHT: the Warm Brown version lists 30.74\" on one page and 34.75\" on another."
+ },
+ {
+  "retailer": "Crate & Barrel",
+  "name": "Tate 68\" Walnut Wood 9-Drawer Dresser",
+  "category": "dresser",
+  "url": "https://www.crateandbarrel.com/tate-68-walnut-wood-9-drawer-dresser/s113922",
+  "w_cm": 172.7,
+  "d_cm": 50.8,
+  "h_cm": 83.8,
+  "seat_h_cm": null,
+  "w_in": 68,
+  "d_in": 20,
+  "h_in": 33,
+  "seat_h_in": null,
+  "materials": [
+   "solid walnut",
+   "walnut veneer",
+   "engineered wood"
+  ],
+  "colors": [
+   {
+    "name": "Walnut",
+    "hex": "#6B4A2F"
+   },
+   {
+    "name": "Black",
+    "hex": "#1E1E1E"
+   }
+  ],
+  "price_usd": 1999,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "$1,799 also seen. Black is a separate SKU."
+ },
+ {
+  "retailer": "Crate & Barrel",
+  "name": "Tate Walnut King Wood Bed",
+  "category": "bed_king",
+  "url": "https://www.crateandbarrel.com/tate-walnut-king-wood-bed/s327566",
+  "w_cm": 205.1,
+  "d_cm": 212.7,
+  "h_cm": 99.1,
+  "seat_h_cm": null,
+  "w_in": 80.75,
+  "d_in": 83.75,
+  "h_in": 39,
+  "seat_h_in": null,
+  "materials": [
+   "solid walnut",
+   "walnut veneer",
+   "engineered wood"
+  ],
+  "colors": [
+   {
+    "name": "Walnut",
+    "hex": "#6B4A2F"
+   }
+  ],
+  "price_usd": 1599,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Out of stock, on clearance at $1,199.97; may be ending. The queen is 64.75x83.75x39, $1,399."
+ },
+ {
+  "retailer": "Crate & Barrel",
+  "name": "Tate 23\" Walnut Wood Nightstand",
+  "category": "nightstand",
+  "url": "https://www.crateandbarrel.com/tate-23-walnut-wood-nightstand/s113457",
+  "w_cm": 58.4,
+  "d_cm": 45.7,
+  "h_cm": 62.2,
+  "seat_h_cm": null,
+  "w_in": 23,
+  "d_in": 18,
+  "h_in": 24.5,
+  "seat_h_in": null,
+  "materials": [
+   "solid walnut",
+   "walnut veneer"
+  ],
+  "colors": [
+   {
+    "name": "Walnut",
+    "hex": "#6B4A2F"
+   },
+   {
+    "name": "Black",
+    "hex": "#1E1E1E"
+   }
+  ],
+  "price_usd": 599,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Some older pages show $499. Black is a separate listing."
+ },
+ {
+  "retailer": "Crate & Barrel",
+  "name": "Tate 64.5\" Walnut Storage Media Console",
+  "category": "media_console",
+  "url": "https://www.crateandbarrel.com/tate-64.5-walnut-storage-media-console/s119996",
+  "w_cm": 163.8,
+  "d_cm": 40.6,
+  "h_cm": 76.2,
+  "seat_h_cm": null,
+  "w_in": 64.5,
+  "d_in": 16,
+  "h_in": 30,
+  "seat_h_in": null,
+  "materials": [
+   "solid walnut",
+   "engineered wood",
+   "walnut veneer"
+  ],
+  "colors": [
+   {
+    "name": "Walnut",
+    "hex": "#6B4A2F"
+   }
+  ],
+  "price_usd": 1599,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet); size matches the Tate credenza variant and Freedom Room",
+  "note": "A $1,099 credenza/media console listing also exists; prices differ by SKU."
+ },
+ {
+  "retailer": "Crate & Barrel",
+  "name": "Keane Weathered Natural Wood 54\" Rectangular Storage Coffee Table",
+  "category": "coffee_table",
+  "url": "https://www.crateandbarrel.com/keane-weathered-natural-wood-54-rectangular-storage-coffee-table/s677705",
+  "w_cm": 137.2,
+  "d_cm": 81.3,
+  "h_cm": 43.2,
+  "seat_h_cm": null,
+  "w_in": 54,
+  "d_in": 32,
+  "h_in": 17,
+  "seat_h_in": null,
+  "materials": [
+   "FSC-certified mahogany",
+   "meranti veneer",
+   "engineered hardwood"
+  ],
+  "colors": [
+   {
+    "name": "Weathered Natural",
+    "hex": "#B9A98F"
+   }
+  ],
+  "price_usd": 1499,
+  "price_seen": "2026-10-31",
+  "style": [
+   "transitional",
+   "coastal"
+  ],
+  "dims_source": "third-party: Havenly (price and materials official)",
+  "note": "Dimensions not confirmed by an official snippet; verify. Sale $1,199 seen."
+ },
+ {
+  "retailer": "Crate & Barrel",
+  "name": "Libations Antique Brass Storage Bar Cart",
+  "category": "bar_cart",
+  "url": "https://www.crateandbarrel.com/libations-bar-cart/s303224",
+  "w_cm": 83.8,
+  "d_cm": 35.6,
+  "h_cm": 82.5,
+  "seat_h_cm": null,
+  "w_in": 33,
+  "d_in": 14,
+  "h_in": 32.5,
+  "seat_h_in": null,
+  "materials": [
+   "iron, brass-plated finish",
+   "glass top",
+   "mirrored lower shelf"
+  ],
+  "colors": [
+   {
+    "name": "Antique Brass",
+    "hex": "#A57C3E"
+   }
+  ],
+  "price_usd": 699,
+  "price_seen": "2026-10-31",
+  "style": [
+   "glam",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Single finish."
+ },
+ {
+  "retailer": "CB2",
+  "name": "Marguerite 75\" Apartment Sofa",
+  "category": "loveseat",
+  "url": "https://www.cb2.com/marguerite-75-apartment-sofa/s682257",
+  "w_cm": 190.5,
+  "d_cm": 104.1,
+  "h_cm": 71.1,
+  "seat_h_cm": null,
+  "w_in": 75,
+  "d_in": 41,
+  "h_in": 28,
+  "seat_h_in": null,
+  "materials": [
+   "Crypton performance chenille upholstery"
+  ],
+  "colors": [
+   {
+    "name": "Nomad Snow",
+    "hex": "#F2F0EA"
+   },
+   {
+    "name": "Nomad Caramel",
+    "hex": "#B07A45"
+   },
+   {
+    "name": "Nomad Stone",
+    "hex": "#B3ACA0"
+   },
+   {
+    "name": "Nomad Charcoal",
+    "hex": "#3E3F41"
+   }
+  ],
+  "price_usd": 1999,
+  "price_seen": "2026-10-31",
+  "style": [
+   "contemporary",
+   "minimalist"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Substitute for the discontinued Avec sofa. $2,099 also seen."
+ },
+ {
+  "retailer": "CB2",
+  "name": "Gwyneth Ivory Boucle Swivel Chair by goop",
+  "category": "accent_chair",
+  "url": "https://www.cb2.com/gwyneth-ivory-boucle-swivel-chair-by-goop/s265795",
+  "w_cm": 83.8,
+  "d_cm": 90.2,
+  "h_cm": 74.9,
+  "seat_h_cm": null,
+  "w_in": 33,
+  "d_in": 35.5,
+  "h_in": 29.5,
+  "seat_h_in": null,
+  "materials": [
+   "poly-blend boucle",
+   "swivel base"
+  ],
+  "colors": [
+   {
+    "name": "Ivory boucle",
+    "hex": "#EDE7DA"
+   },
+   {
+    "name": "Black boucle",
+    "hex": "#1F1E1C"
+   }
+  ],
+  "price_usd": 999,
+  "price_seen": "2026-10-31",
+  "style": [
+   "organic-modern",
+   "contemporary"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "The non-swivel black chair is a different size (34x32.5x29)."
+ },
+ {
+  "retailer": "CB2",
+  "name": "Camden 101\" White Performance Fabric Sofa",
+  "category": "sofa",
+  "url": "https://www.cb2.com/camden-101-white-performance-fabric-sofa/s184703",
+  "w_cm": 256.5,
+  "d_cm": 94.0,
+  "h_cm": 78.7,
+  "seat_h_cm": null,
+  "w_in": 101,
+  "d_in": 37,
+  "h_in": 31,
+  "seat_h_in": null,
+  "materials": [
+   "performance fabric upholstery"
+  ],
+  "colors": [
+   {
+    "name": "White",
+    "hex": "#F3F1EC"
+   }
+  ],
+  "price_usd": 2199,
+  "price_seen": "2026-10-31",
+  "style": [
+   "modern",
+   "minimalist"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Materials and colour come from the product name only."
+ },
+ {
+  "retailer": "Article",
+  "name": "Sven 88\" Tufted Leather Sofa - Charme Tan",
+  "category": "sofa",
+  "url": "https://www.article.com/product/24178/sven-88-tufted-leather-sofa-charme-tan",
+  "w_cm": 223.5,
+  "d_cm": 96.5,
+  "h_cm": 86.4,
+  "seat_h_cm": 48.3,
+  "w_in": 88,
+  "d_in": 38,
+  "h_in": 34,
+  "seat_h_in": 19,
+  "materials": [
+   "full-aniline Italian leather",
+   "kiln-dried solid pine frame",
+   "solid rubberwood legs",
+   "polyurethane foam"
+  ],
+  "colors": [
+   {
+    "name": "Charme Tan",
+    "hex": "#B5733A"
+   },
+   {
+    "name": "Charme Green",
+    "hex": "#4C5A3A"
+   },
+   {
+    "name": "Oxford Black",
+    "hex": "#1C1B1A"
+   },
+   {
+    "name": "Oxford Blue",
+    "hex": "#2B3A55"
+   }
+  ],
+  "price_usd": 1699,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "modern"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Seat height from sibling Sven 88\" listings (same frame). Each colour has its own URL."
+ },
+ {
+  "retailer": "Article",
+  "name": "Timber 31\" Leather Ottoman - Charme Tan",
+  "category": "ottoman",
+  "url": "https://www.article.com/product/22737/timber-31-leather-ottoman-charme-tan",
+  "w_cm": 78.7,
+  "d_cm": 61.0,
+  "h_cm": 49.5,
+  "seat_h_cm": null,
+  "w_in": 31,
+  "d_in": 24,
+  "h_in": 19.5,
+  "seat_h_in": null,
+  "materials": [
+   "full-aniline Italian leather",
+   "solid pine",
+   "rubberwood legs",
+   "plywood"
+  ],
+  "colors": [
+   {
+    "name": "Charme Tan",
+    "hex": "#B5733A"
+   },
+   {
+    "name": "Charme Chocolat",
+    "hex": "#4A2F22"
+   },
+   {
+    "name": "Charme Black",
+    "hex": "#1C1B1A"
+   },
+   {
+    "name": "Charme Green",
+    "hex": "#4C5A3A"
+   }
+  ],
+  "price_usd": 499,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "scandinavian"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "CHECK SIZE: other colours list 32.5x25x20.5."
+ },
+ {
+  "retailer": "Article",
+  "name": "Seno 71\" Dining Table - Walnut",
+  "category": "dining_table_rect",
+  "url": "https://www.article.com/product/27599/seno-71-dining-table-walnut",
+  "w_cm": 180.3,
+  "d_cm": 95.2,
+  "h_cm": 73.7,
+  "seat_h_cm": null,
+  "w_in": 71,
+  "d_in": 37.5,
+  "h_in": 29,
+  "seat_h_in": null,
+  "materials": [
+   "walnut veneer",
+   "solid rubberwood"
+  ],
+  "colors": [
+   {
+    "name": "Walnut",
+    "hex": "#6A4A30"
+   },
+   {
+    "name": "Oak",
+    "hex": "#C9A57A"
+   }
+  ],
+  "price_usd": 799,
+  "price_seen": "2026-10-31",
+  "style": [
+   "mid-century",
+   "scandinavian",
+   "minimalist"
+  ],
+  "dims_source": "official listing (search snippet)",
+  "note": "Seats 4-6. Oak has its own URL. A 47\" round Seno also exists (47 dia x 29)."
+ }
+]

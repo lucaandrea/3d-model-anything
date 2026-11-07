@@ -4,18 +4,23 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --config apps/room-viewer/vite.config.ts",
+    "dev": "node tools/start-viewer.mjs",
     "build": "tsc && vite build --config apps/room-viewer/vite.config.ts",
     "preview": "vite preview --config apps/room-viewer/vite.config.ts",
-    "textures": "python3 .agents/skills/scan-to-threejs/scripts/fetch_textures.py"
+    "textures": "python3 .agents/skills/scan-to-threejs/scripts/fetch_textures.py",
+    "build:review": "tsc && PRIVATE_REVIEW=1 vite build --config apps/room-viewer/vite.config.ts",
+    "review": "npm run build:review && node tools/start-loft-review.mjs",
+    "test:review": "node --test tools/tests/loft-review.test.mjs"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "^0.20.0",
+    "fflate": "^0.8.3",
     "three": "^0.186.0"
   },
   "devDependencies": {
     "@gltf-transform/core": "^4.5.0",
     "@types/three": "^0.186.0",
+    "agent-browser": "^0.39.2",
     "gl-matrix": "^3.4.4",
     "pngjs": "^7.0.0",
     "typescript": "^7.0.2",

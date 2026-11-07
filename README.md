@@ -8,6 +8,11 @@ Capture a room on an iPhone, then use its geometry and photographs to build an e
 
 This repository includes the **3D Model Anything iPhone app**, a **Three.js viewer**, the **scan-to-threejs agent skill**, and **Wes’s detailed office demo**.
 
+For this Mac's installed tools, Luca's signing configuration, TestFlight access and first-scan steps, see [Luca's setup](docs/luca-setup.md).
+
+For printed calibration cards, paired iPhone/Vision Pro capture, Blender spatial exports and
+physical acceptance gates, see [paired loft scanning](docs/paired-scanning.md).
+
 The app records the evidence. The skill guides an agent through measurement, modeling and matched-camera visual comparisons. This is an iterative reconstruction workflow, not a one-click scan-to-perfect-model converter. The current workflow focuses on rooms and interiors.
 
 ## Run the viewer
@@ -19,7 +24,7 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:5188. Explore the office in dollhouse, walking, overhead, wireframe and knolling views. The playground is at `/play.html?room=office-v4&mode=fpv`.
+Open http://localhost:5188 for the first-scan workflow. Choose **Existing rooms & demos → Wes’s office**, or open `/?room=office-v4`, to explore the office in dollhouse, walking, overhead, wireframe and knolling views. The playground is at `/play.html?room=office-v4&mode=fpv`. Running `npm run dev` again reuses this checkout’s existing server.
 
 ```sh
 npm run build
@@ -27,6 +32,10 @@ npm run preview
 ```
 
 The demo includes the reconstructed office and selected textures. Original scans and photo collections are not distributed; Scan and Overlay are disabled for this example. Those modes remain available for your own rooms with reference assets.
+
+### Review your model from an iPad
+
+Run `npm run review` with Node 24, then open `http://localhost:5190/review.html` on the Mac. **Open on iPad** shows the private Wi-Fi address and access code. Upload screenshots annotated in iPad Markup, add correction notes and reference photographs, then send the package to the Mac or download a ZIP. Each review contains JSON, original image files, and the model revision. See [the review guide](docs/loft-review.md) for setup, recovery, privacy, and the Codex handoff.
 
 ## Capture your own space
 
