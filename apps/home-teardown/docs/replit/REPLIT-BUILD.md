@@ -145,8 +145,16 @@ Notes:
 1. Import the GitHub repository into a new Repl. Confirm `apps/home-teardown/server.mjs` exists.
 2. Add the Secrets from §4. Ask the user for `ANTHROPIC_API_KEY` and `APP_PASSCODE`.
 3. Create `.replit` as in §5.
-4. Open **App Storage** (Object Storage) in the Repl, create a bucket (the default bucket is fine). Ask the user to
-   upload the files from §3 items 1 and 2 with exactly those object names. Wait until they confirm.
+4. Open **App Storage** (Object Storage) in the Repl and create a bucket (the default bucket is fine). Then put the
+   files from §3 items 1 and 2 into App Storage with exactly those object names. The simplest way:
+   upload them into the Repl's workspace at the same relative paths (both folders are git-ignored, so they are never
+   committed): `data/scans/loft-refinements-2026-11-01/` (the three model files) and
+   `apps/home-teardown/private/loft-refinements-2026-11-01/` (the two JSON files). Then run in the shell:
+   ```bash
+   cd apps/home-teardown && npm install @replit/object-storage && node tools/replit-upload-private.mjs
+   ```
+   It uploads each file under its object name and lists them back. (Uploading directly in the App Storage tool with
+   the same names also works.)
 5. In the shell:
    ```bash
    cd apps/home-teardown
