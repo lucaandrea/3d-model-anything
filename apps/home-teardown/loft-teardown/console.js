@@ -54,6 +54,14 @@ const CSS = `
 .stl.done{color:${C.ink}} .stl.done i{background:${C.ink};border-color:${C.ink}}
 .stl.now{color:${C.or}} .stl.now i{background:${C.or};border-color:${C.or}}
 /* rearrange */
+.panel-group{position:absolute;inset:0}
+.panel-group[hidden],.panel-toggle[hidden]{display:none!important}
+.panel-toggle{position:absolute;display:flex;align-items:center;justify-content:center;gap:7px;min-height:32px;padding:0 11px;border:1px solid ${C.faint};border-radius:5px;background:#fffdf9;color:${C.ink};font:700 9px 'JetBrains Mono',monospace;letter-spacing:1px;cursor:pointer;pointer-events:auto;box-shadow:0 2px 8px rgba(120,90,50,.07)}
+.panel-toggle:hover{border-color:${C.or};color:${C.or}}
+.panel-toggle:focus-visible{outline:2px solid ${C.or};outline-offset:3px}
+.panel-toggle.icon{width:32px;padding:0;font-size:17px}
+.panel-toggle.focus.on{background:${C.ink};border-color:${C.ink};color:#fffdf9}
+.panel-toggle.edge{z-index:6}
 .chat{position:absolute;left:calc(1178px + var(--dw));top:112px;width:394px;height:calc(760px + var(--dh));display:flex;flex-direction:column;pointer-events:auto}
 .chat .log{flex:1;overflow-y:auto;padding:12px 14px 6px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin}
 .msg{font-size:12.5px;line-height:1.5;border-radius:8px;padding:9px 11px;white-space:pre-wrap;word-wrap:break-word}
@@ -76,7 +84,7 @@ const CSS = `
 .chips div{font:500 11px Inter,sans-serif;padding:5px 9px;border-radius:12px;border:1px solid ${C.faint};background:#fffdf9;cursor:pointer;color:#5d544a}
 .chips div:hover{border-color:${C.or};color:${C.or}}
 .chips div.more{border-color:${C.or};color:${C.or};font-weight:600}
-.lib{position:absolute;left:0;right:0;top:44px;bottom:92px;background:#fffdf9;display:none;flex-direction:column;z-index:5;border-bottom:1px solid ${C.line}}
+.lib{position:absolute;left:0;right:0;top:76px;bottom:92px;background:#fffdf9;display:none;flex-direction:column;z-index:5;border-bottom:1px solid ${C.line}}
 .lib.on{display:flex}
 .lib .lh{display:flex;align-items:center;gap:8px;padding:10px 14px 6px}
 .lib .lh .t{font:700 10px 'JetBrains Mono',monospace;letter-spacing:1.6px;white-space:nowrap}
@@ -278,10 +286,11 @@ export function createConsole(app) {
 
   // ------------------------------------------------------------ rearrange layer
   const ar = add(`<div style="position:absolute;inset:0;display:none"></div>`);
-  add(`<div class="cp leftcp" style="left:28px;top:112px;height:${SH(760)}"></div>`, ar);
-  const tabs2 = add(`<div class="tabs2"><div class="on">LAYOUTS</div><div>CATALOG</div></div>`, ar);
-  const layList = add(`<div style="position:absolute;inset:0"></div>`, ar);
-  const cat = add(`<div class="cat"><input class="q" placeholder="Search: sofa, walnut, IKEA, boucle…"><div class="f"><select data-k="category"></select><select data-k="brand"></select><select data-k="style"></select></div><div class="f"><select data-k="three"></select><select data-k="sort"><option value="">Best match</option><option value="price">Price ↑</option><option value="size">Smallest</option></select></div><div class="swap"><span></span><b>CANCEL</b></div><div class="n"></div><div class="list"></div></div>`, ar);
+  const groups = Object.fromEntries(['left', 'right', 'bottom'].map((key) => [key, add(`<div class="panel-group" id="arrange-${key}"></div>`, ar)]));
+  const leftBox = add(`<div class="cp leftcp" style="left:28px;top:112px;height:${SH(760)}"></div>`, groups.left);
+  const tabs2 = add(`<div class="tabs2"><div class="on">LAYOUTS</div><div>CATALOG</div></div>`, groups.left);
+  const layList = add(`<div style="position:absolute;inset:0"></div>`, groups.left);
+  const cat = add(`<div class="cat"><input class="q" placeholder="Search: sofa, walnut, IKEA, boucle…"><div class="f"><select data-k="category"></select><select data-k="brand"></select><select data-k="style"></select></div><div class="f"><select data-k="three"></select><select data-k="sort"><option value="">Best match</option><option value="price">Price ↑</option><option value="size">Smallest</option></select></div><div class="swap"><span></span><b>CANCEL</b></div><div class="n"></div><div class="list"></div></div>`, groups.left);
   let tab = 0;
   const setTab = (i) => {
     tab = i;
@@ -289,14 +298,15 @@ export function createConsole(app) {
     [...tabs2.children].forEach((t, k) => t.classList.toggle('on', k === i));
     layList.style.display = i === 0 ? 'block' : 'none';
     cat.classList.toggle('on', i === 1);
+    setPanel('left', false);
   };
   [...tabs2.children].forEach((t, i) => t.addEventListener('click', () => setTab(i)));
-  add(`<div class="cp" style="left:${X(1178, 'r')};top:112px;width:394px;height:${SH(760)}"></div>`, ar);
-  const chat = add(`<div class="chat"></div>`, ar);
-  const chatHead = add(`<div style="position:relative;height:44px;border-bottom:1px solid ${C.line}"></div>`, chat);
+  add(`<div class="cp" style="left:${X(1178, 'r')};top:112px;width:394px;height:${SH(760)}"></div>`, groups.right);
+  const chat = add(`<div class="chat"></div>`, groups.right);
+  const chatHead = add(`<div style="position:relative;height:76px;flex-shrink:0;border-bottom:1px solid ${C.line}"></div>`, chat);
   add(`<div class="ph" style="left:14px;top:14px"><i></i>CLAUDE OPUS 5.5</div>`, chatHead);
-  const newChat = add(`<div class="bt" style="right:150px;top:11px;height:20px;font-size:8.4px;padding:0 7px" title="Start a fresh conversation with Claude">NEW CHAT</div>`, chatHead);
-  const effort = add(`<div class="seg" style="right:12px;top:8px;padding:2px;gap:2px"></div>`, chatHead);
+  const newChat = add(`<div class="bt" style="left:14px;top:42px;height:24px;font-size:8.4px;padding:0 7px" title="Start a fresh conversation with Claude">NEW CHAT</div>`, chatHead);
+  const effort = add(`<div class="seg" style="right:12px;top:40px;padding:2px;gap:2px"></div>`, chatHead);
   const effortBtn = {};
   for (const [k, l] of [['medium', 'QUICK'], ['high', 'THOROUGH']]) {
     effortBtn[k] = add(`<div style="width:64px;height:24px;font-size:8.6px">${l}</div>`, effort);
@@ -308,18 +318,76 @@ export function createConsole(app) {
   const ask = add(`<div class="ask"><textarea placeholder="Ask for a layout: “make the living room work for 8 guests”, “swap the sectional for a sage velvet sofa”…"></textarea><button>SEND</button></div>`, chat);
   const input = ask.querySelector('textarea');
   const send = ask.querySelector('button');
-  panel(330, 776, 836, 96, 'ARRANGE', '02', ar, 'bW');
-  btn.floorGround = add(`<div class="bt" style="left:346px;top:${Y(812, 'b')};width:80px">GROUND</div>`, ar);
-  btn.floorUpper = add(`<div class="bt" style="left:432px;top:${Y(812, 'b')};width:80px">UPPER</div>`, ar);
-  btn.viewPlan = add(`<div class="bt" style="left:530px;top:${Y(812, 'b')};width:64px">PLAN</div>`, ar);
-  btn.view3d = add(`<div class="bt" style="left:600px;top:${Y(812, 'b')};width:52px">3D</div>`, ar);
-  btn.compare = add(`<div class="bt" style="left:664px;top:${Y(812, 'b')};width:112px">HOLD: ORIGINAL</div>`, ar);
-  btn.swap = add(`<div class="bt" style="left:792px;top:${Y(812, 'b')};width:62px">SWAP</div>`, ar);
-  btn.store = add(`<div class="bt" style="left:860px;top:${Y(812, 'b')};width:72px">REMOVE</div>`, ar);
-  btn.rotate = add(`<div class="bt" style="left:938px;top:${Y(812, 'b')};width:96px">ROTATE 90°</div>`, ar);
-  btn.resetEdits = add(`<div class="bt" style="left:1040px;top:${Y(812, 'b')};width:110px">RESET PIECE</div>`, ar);
-  const arHint = add(`<div class="sm" style="position:absolute;left:346px;top:${Y(846, 'b')};width:${SW(800)};overflow:hidden;text-overflow:ellipsis"></div>`, ar);
-  const arSel = add(`<div class="mo" style="position:absolute;left:452px;top:${Y(792, 'b')};width:${SW(640)};overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:9.5px;letter-spacing:1px;color:${C.ink}"></div>`, ar);
+  const toolbar = panel(330, 776, 836, 96, 'ARRANGE', '', groups.bottom, 'bW').box;
+  btn.floorGround = add(`<div class="bt" style="left:346px;top:${Y(812, 'b')};width:80px">GROUND</div>`, groups.bottom);
+  btn.floorUpper = add(`<div class="bt" style="left:432px;top:${Y(812, 'b')};width:80px">UPPER</div>`, groups.bottom);
+  btn.viewPlan = add(`<div class="bt" style="left:530px;top:${Y(812, 'b')};width:64px">PLAN</div>`, groups.bottom);
+  btn.view3d = add(`<div class="bt" style="left:600px;top:${Y(812, 'b')};width:52px">3D</div>`, groups.bottom);
+  btn.compare = add(`<div class="bt" style="left:664px;top:${Y(812, 'b')};width:112px">HOLD: ORIGINAL</div>`, groups.bottom);
+  btn.swap = add(`<div class="bt" style="left:792px;top:${Y(812, 'b')};width:62px">SWAP</div>`, groups.bottom);
+  btn.store = add(`<div class="bt" style="left:860px;top:${Y(812, 'b')};width:72px">REMOVE</div>`, groups.bottom);
+  btn.rotate = add(`<div class="bt" style="left:938px;top:${Y(812, 'b')};width:96px">ROTATE 90°</div>`, groups.bottom);
+  btn.resetEdits = add(`<div class="bt" style="left:1040px;top:${Y(812, 'b')};width:110px">RESET PIECE</div>`, groups.bottom);
+  const arHint = add(`<div class="sm" style="position:absolute;left:346px;top:${Y(846, 'b')};width:${SW(800)};overflow:hidden;text-overflow:ellipsis"></div>`, groups.bottom);
+  const arSel = add(`<div class="mo" style="position:absolute;left:452px;top:${Y(792, 'b')};width:${SW(640)};overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:9.5px;letter-spacing:1px;color:${C.ink}"></div>`, groups.bottom);
+
+  // Hide whole groups without rebuilding their contents: searches, drafts, scroll and selection stay intact.
+  const hidden = {left: false, right: false, bottom: false};
+  try {
+    const saved = JSON.parse(localStorage.getItem('loft-panel-visibility') || '{}');
+    for (const key of Object.keys(hidden)) hidden[key] = saved?.[key] === true;
+  } catch {}
+  let focusSnapshot = null;
+  const focusButton = add(`<button type="button" class="panel-toggle focus" style="right:28px;top:70px" aria-controls="arrange-left arrange-right arrange-bottom" aria-keyshortcuts="F" title="Hide all panels to place furniture (F); press again to restore">FOCUS ROOM <span aria-hidden="true">⛶</span></button>`, ar);
+  const toggle = (parent, key, label, glyph, style) => add(`<button type="button" class="panel-toggle icon" style="${style}" aria-label="${label}" title="${label}" aria-controls="arrange-${key}">${glyph}</button>`, parent);
+  const hideButtons = {
+    left: toggle(leftBox, 'left', 'Hide catalog and layouts', '‹', 'right:9px;top:8px'),
+    right: toggle(chatHead, 'right', 'Hide Claude panel', '›', 'right:10px;top:5px'),
+    bottom: toggle(toolbar, 'bottom', 'Hide arrange toolbar', '⌄', 'right:10px;top:2px'),
+  };
+  const showButtons = {
+    left: add(`<button type="button" class="panel-toggle edge" style="left:28px;top:112px" aria-controls="arrange-left">CATALOG & LAYOUTS ›</button>`, ar),
+    right: add(`<button type="button" class="panel-toggle edge" style="right:28px;top:112px" aria-controls="arrange-right">‹ CLAUDE</button>`, ar),
+    bottom: add(`<button type="button" class="panel-toggle edge" style="left:${X(800, 'c')};bottom:28px;transform:translateX(-50%)" aria-controls="arrange-bottom">⌃ ARRANGE TOOLS</button>`, ar),
+  };
+  const syncPanels = () => {
+    for (const key of Object.keys(hidden)) {
+      groups[key].hidden = hidden[key];
+      showButtons[key].hidden = !hidden[key];
+      hideButtons[key].setAttribute('aria-expanded', String(!hidden[key]));
+      showButtons[key].setAttribute('aria-expanded', String(!hidden[key]));
+    }
+    const focused = Object.values(hidden).every(Boolean);
+    focusButton.classList.toggle('on', focused);
+    focusButton.setAttribute('aria-pressed', String(focused));
+    focusButton.textContent = focused ? 'RESTORE PANELS ↙' : 'FOCUS ROOM ⛶';
+    try { localStorage.setItem('loft-panel-visibility', JSON.stringify(hidden)); } catch {}
+  };
+  const setPanel = (key, hide, moveFocus = false) => {
+    hidden[key] = hide;
+    focusSnapshot = null;
+    syncPanels();
+    if (moveFocus) (hide ? showButtons[key] : hideButtons[key]).focus({preventScroll: true});
+  };
+  const toggleFocus = () => {
+    if (Object.values(hidden).every(Boolean)) {
+      Object.assign(hidden, focusSnapshot || {left: false, right: false, bottom: false});
+      focusSnapshot = null;
+    } else {
+      focusSnapshot = {...hidden};
+      Object.assign(hidden, {left: true, right: true, bottom: true});
+    }
+    syncPanels();
+    focusButton.focus({preventScroll: true});
+  };
+  focusButton.addEventListener('click', toggleFocus);
+  for (const key of Object.keys(hidden)) {
+    hideButtons[key].addEventListener('click', () => setPanel(key, true, true));
+    showButtons[key].addEventListener('click', () => setPanel(key, false, true));
+  }
+  syncPanels();
+  const leftEdge = () => hidden.left ? 28 : tab === 1 ? cat.offsetLeft + cat.offsetWidth + 20 : 330;
+  const clearArea = () => ({l: leftEdge(), r: frame.w - (hidden.right ? 28 : 442), t: 120, b: frame.h - (hidden.bottom ? 72 : 140)});
 
   // ------------------------------------------------------------ labels, trays, the pointer, toast, loader
   const callSvg = add(`<svg style="position:absolute;inset:0;width:100%;height:100%;overflow:visible"></svg>`);
@@ -339,7 +407,12 @@ export function createConsole(app) {
   const api = {
     root: ui, btn, modeBtn, effortBtn, input, send, log, chips, layList, roomsPanel, TL, SP, tourChip, loader, newChat, cat, setTab, refurb, frame,
     /** Where the clear view starts on the left, in frame pixels: past the layouts panel, or the wider catalogue. */
-    leftEdge: () => (tab === 1 && ar.style.display !== 'none' ? cat.offsetLeft + cat.offsetWidth + 20 : 330),
+    leftEdge, clearArea, toggleFocus,
+    restoreFocus() {
+      if (!Object.values(hidden).every(Boolean)) return false;
+      toggleFocus();
+      return true;
+    },
     /** The frame live.js laid out (1600 x 900 or wider / taller): moves the slider geometry with it. */
     resize(w, h) {
       frame.w = w;

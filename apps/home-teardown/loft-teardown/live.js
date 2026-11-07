@@ -336,10 +336,11 @@ export async function runLive() {
     subject.min.lerpVectors(houseBox.min, siteBox.min, kb);
     subject.max.lerpVectors(houseBox.max, siteBox.max, kb);
     const rad = {...tgt, az: tgt.az * D2R, el: tgt.el * D2R};
-    const area = (w, h, l) => ({l, r: w - (arr ? 442 : 330), t: 120, b: h - 140});
-    const ref = st.fitIn({...rad, sx: arr ? -56 : rad.sx}, subject, 1600, 900, area(1600, 900, 330));
-    // closer on a wider frame; further back when the open catalogue leaves less room than the frame was tuned for
-    return ref > 0 ? clamp(st.fitIn(rad, subject, W, H, area(W, H, arr ? ui.leftEdge() : 330)) / ref, 0.55, 2.5) : 1;
+    const referenceArea = {l: 330, r: 1600 - (arr ? 442 : 330), t: 120, b: 760};
+    const ref = st.fitIn({...rad, sx: arr ? -56 : rad.sx}, subject, 1600, 900, referenceArea);
+    const area = arr ? ui.clearArea() : {l: 330, r: W - 330, t: 120, b: H - 140};
+    // Fit to the space actually available, including the space released by tucked-away panels.
+    return ref > 0 ? clamp(st.fitIn(rad, subject, W, H, area) / ref, 0.55, 2.5) : 1;
   };
 
   // ------------------------------------------------------------ the tour
@@ -636,7 +637,7 @@ export async function runLive() {
   ui.btn.resetEdits.addEventListener('click', resetSel);
 
   addEventListener('keydown', (e) => {
-    if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement) return;
+    if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target.isContentEditable) return;
     if (e.altKey || e.ctrlKey || e.metaKey) return;
     takeOver();
     const key = e.key.toLowerCase();
@@ -646,6 +647,8 @@ export async function runLive() {
     else if (key === 'r' && mode === 'rearrange') rotateSel();
     else if ((key === 'delete' || key === 'backspace') && mode === 'rearrange') storeSel();
     else if (key === 'c' && mode === 'rearrange') startCompare();
+    else if (key === 'f' && mode === 'rearrange') { if (!e.repeat) ui.toggleFocus(); }
+    else if (key === 'escape' && mode === 'rearrange' && ui.restoreFocus()) { /* Keep the selected piece. */ }
     else if (key === 'escape') selected = null;
     else return;
     e.preventDefault();
@@ -926,8 +929,9 @@ export async function runLive() {
     let cut = null;
     if (mode === 'rearrange') {
       tgt = {...AR_CAM[arView](arFloor)};
-      // centred in the clear view between the left panel (wider while the catalogue is open) and the Claude panel
-      tgt.sx = (ui.leftEdge() + W - 442) / 2 - W / 2;
+      const area = ui.clearArea();
+      tgt.sx = (area.l + area.r - W) / 2;
+      tgt.sy = (area.t + area.b - H) / 2;
       floorFilter = arFloor === 'ground' ? 'ground' : null;
       if (u < 0.001) cut = arFloor === 'upper' ? UPPER_Y + (arView === 'plan' ? 1.4 : 1.9) : arView === '3d' ? 2.0 : 1.4;
     } else {
@@ -1042,7 +1046,8 @@ export async function runLive() {
         for (const f of placedFor(v)) {
           if (!f.changed || f.floor !== arFloor) continue;
           const at = st.project(f.cx, (f.floor === 'upper' ? UPPER_Y : 0) + f.h + 0.05, f.cz);
-          if (at && at[0] > ui.leftEdge() - 10 && at[0] < W - 430 && at[1] > 120 && at[1] < H - 130) trayLabels.push({at: [at[0] - 20, at[1]], label: f.label, n: '', o: 0.95});
+          const area = ui.clearArea();
+          if (at && at[0] > area.l - 10 && at[0] < area.r + 12 && at[1] > area.t && at[1] < area.b + 10) trayLabels.push({at: [at[0] - 20, at[1]], label: f.label, n: '', o: 0.95});
           if (trayLabels.length > 16) break;
         }
       }
@@ -1057,7 +1062,8 @@ export async function runLive() {
         let [x, y] = t.at;
         let ok = false;
         for (let k = 0; k < 6 && !ok; k++, y += 15) ok = !placed.some((r) => x < r.x + r.w && x + w > r.x && y - 15 < r.y && y > r.y - 15) && !callouts.some((c) => x < c.label[0] + c.w && x + w > c.label[0] && y - 15 < c.label[1] + 20 && y > c.label[1] - 4);
-        if (!ok || x + w > W - (mode === 'rearrange' ? 432 : 320) || x < (mode === 'rearrange' ? ui.leftEdge() - 12 : 318)) continue;
+        const area = mode === 'rearrange' ? ui.clearArea() : {l: 330, r: W - 330};
+        if (!ok || x + w > area.r + 10 || x < area.l - 12) continue;
         placed.push({x, y, w});
         kept.push({...t, at: [x, y]});
       }
